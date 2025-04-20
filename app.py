@@ -23,17 +23,18 @@ import re
 from flask_wtf.csrf import CSRFProtect, CSRFError
 import cloudinary
 import cloudinary.uploader
-
+from dotenv import load_dotenv
+load_dotenv()
 # ===================================================
 #                  >>>> APP CONFIGURATIONS <<<<
 # ===================================================
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mum_i_love_you_by_vinney'
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "3ab7b7e619e24a3ae40a46c79b9b80439251aa976d03eb909dfe37d4a4a927dd")
 app.config['SESSION_PERMANENT'] = True 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///e-commerce.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'dad_i_love_you_by_vinney'
+app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
 app.config['ACTIVITY_RETENTION_DAYS'] = 1
 # ===================================================
 #                  >>>> EXTENSIONS INIT <<<<
@@ -59,7 +60,6 @@ csrf.init_app(app)  # Attach CSRF protection
 #app.permanent_session_lifetime = timedelta(minutes=45)
 
 os.environ['TZ'] = 'Africa/Nairobi'
-app.secret_key = os.getenv("SECRET_KEY")
 
 def nairobi_time():
     return datetime.utcnow() + timedelta(hours=3)
