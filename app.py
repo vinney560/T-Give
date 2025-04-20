@@ -21,9 +21,9 @@ from flask import abort
 import os
 import re
 from flask_wtf.csrf import CSRFProtect, CSRFError
-import cloudinary
-import cloudinary.uploader
-import cloudinary.utils
+from flask import send_file
+import zipfile
+import io
 from dotenv import load_dotenv
 load_dotenv()
 # ===================================================
@@ -64,13 +64,6 @@ os.environ['TZ'] = 'Africa/Nairobi'
 
 def nairobi_time():
     return datetime.utcnow() + timedelta(hours=3)
-
-cloudinary.config(
-  cloud_name = "drma0p4cg",
-  api_key = "948944755532124",
-  api_secret = "948944755532124",
-  secure = True
-)
 
 # ===================================================
 #                  >>>> BLUEPRINTS <<<<
@@ -233,6 +226,25 @@ def admin_required(f):
 @login_manager.user_loader  
 def load_user(user_id):  
     return User.query.get(int(user_id))       
+
+@app.route('/admin/backup_images')
+@admin_required
+def backup_images():
+    upload_folder = os.path.join(app.root_path, 'static', 'uploads')
+    
+    # Create in-memory ZIP
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(upload_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, upload_folder)
+                zf.write(file_path, arcname)
+    
+    memory_file.seek(0)
+    return send_file(memory_file, mimetype='application/zip',
+                     download_name='uploads_backup.zip',
+                     as_attachment=True)
 
 #---------------------------------------------------
 def format_mobile(mobile):
