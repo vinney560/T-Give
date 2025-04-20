@@ -6,3 +6,7 @@ Flask-Bcrypt
 Flask-Cors
 Flask-JWT-Extended
 Flask-Limiter
+flask
+flask-socketio
+eventlet
+gunicorn
