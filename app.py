@@ -50,7 +50,7 @@ limiter = Limiter(get_remote_address, app=app, default_limits=["200 per hour"])
 
 CORS(app)
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 csrf = CSRFProtect()
 csrf.init_app(app)  # Attach CSRF protection
