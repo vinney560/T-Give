@@ -700,6 +700,11 @@ def user_dashboard():
                            user_orders=user_orders, 
                            cart=cart)
 #-------------------------‐--------------------------
+@app.route("/profile")  
+@login_required  
+def profile():  
+    return render_template("profile.html", user=current_user)  
+
 @app.route("/update_profile_pic", methods=["POST"])
 @login_required
 def update_profile_pic():
