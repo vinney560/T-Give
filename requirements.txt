@@ -15,4 +15,3 @@ WTForms>=3.0.1
 gunicorn
 eventlet
 cloudinary
-cloudinary.uploader
