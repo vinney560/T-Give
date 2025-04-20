@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Annah's Business</title>
+  <style>
+    body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; font-size: 20px; margin: 0; padding: 20px; }
+    .nav-buttons button { margin: 10px; padding: 15px 25px; background: cyan; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 22px; }
+    .nav-buttons button:hover { background: #00cccc; }
+    .container { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); padding: 0; text-align: center; justify-content: center; width: 25%; border-radius: 10px; background: red; font-weight: bold; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); opacity: 1; transition: opacity 0.5s ease-in-out; animation: slideIn 0.3s ease-out; }
+    .toast::before {content: ''; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeate; }
+    .toast.success { background: #2ecc71; border-left: 5px solid #27ae60; }
+    .toast.error { background: #e74c3c;  border-left: 5px solid #c0392b; }
+    .toast.success::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    }
+    .toast.error::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+    }
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 5px;
+      z-index: 10000;
+    }
+
+    .toast {
+      min-width: 150px;
+      max-width: 90%;
+      padding: 12px 25px;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.exit {
+      opacity: 0;
+      transform: translateY(-20px);
+    }       
+  </style>
+</head>
+<body>
+  <h1>Admin Dashboard</h1>
+  <div class="container"><div id="toast-container" class="toast-container"></div>
+  </div>
+  <div class="nav-buttons">
+    <button onclick="window.location.href='/admin/quick_view'">Quick View</button>
+    <button onclick="window.location.href='/admin/panel'">Admin Panel</button>
+    <button onclick="window.location.href='/admin/admin_about'">Shop Settings</button>
+    <button onclick="window.location.href='/admin/admin_settings'">Settings</button>
+    <button onclick="window.location.href='/messages'">Manage Messages</button>
+    <button onclick="window.location.href='/admin/manage_users'">Manage Users</button>
+    <button onclick="window.location.href='/admin/manage_emails'">Manage Emails</button>
+    <button onclick="window.location.href='/admin/manage_products'">Manage Products</button>
+    <button onclick="window.location.href='/admin/manage_orders'">Manage Orders</button>
+    <button onclick="window.location.href='/admin/activities'">Manage Activities</button>
+    <button onclick="window.location.href='/admin/account'">Account Settings</button>
+    <button onclick="window.location.href='/logout'">Logout</button>
+  </div>
+  <script>
+     function showToast(message, success = true) {
+       const container = document.getElementById('toast-container');
+       const toast = document.createElement('div');
+       const typeClass = success ? 'success' : 'error';
+    
+       toast.className = `toast ${typeClass}`;
+       toast.innerHTML = `
+         <div class="toast-icon"></div>
+         ${message}
+      `;
+
+       container.prepend(toast);
+       setTimeout(() => toast.classList.add('show'), 10);
+    
+       setTimeout(() => {
+         toast.classList.add('exit');
+         setTimeout(() => toast.remove(), 300);
+       }, 3000);
+     }
+    // Convert Flask flash messages to toasts
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}  
+                showToast("{{ message }}", "{{ category }}" === 'success');
+            {% endfor %}  
+       {% endif %}  
+   {% endwith %}
+</script></body>
+</html>

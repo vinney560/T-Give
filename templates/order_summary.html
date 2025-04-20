@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Summary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styling for specific colors and transitions */
+        .btn-custom {
+            background-color: #00bcd4;
+            color: black;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .btn-custom:hover {
+            background-color: #008c9e;
+            transform: scale(1.05);
+        }
+        .btn-green {
+            background-color: #4caf50;
+            color: white;
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .btn-green:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .total-price {
+            font-size: 2.2rem;
+            color: #00e676;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans p-6">
+
+    <h1 class="text-4xl text-cyan-400 font-bold text-center mb-8">Order Summary</h1>
+
+    {% if orders %}
+    <table class="w-11/12 mx-auto table-auto border-collapse mb-8">
+        <thead>
+            <tr>
+                <th class="px-4 py-2 bg-gray-800 text-cyan-300 font-semibold">Product</th>
+                <th class="px-4 py-2 bg-gray-800 text-cyan-300 font-semibold">Quantity</th>
+                <th class="px-4 py-2 bg-gray-800 text-cyan-300 font-semibold">Price</th>
+                <th class="px-4 py-2 bg-gray-800 text-cyan-300 font-semibold">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in orders %}
+            <tr class="text-lg bg-gray-800 hover:bg-gray-700 transition duration-300">
+                <td class="px-4 py-3">{{ item.name }}</td>
+                <td class="px-4 py-3">{{ item.quantity }}</td>
+                <td class="px-4 py-3">Ksh {{ item.price }}</td>
+                <td class="px-4 py-3">Ksh {{ item.price * item.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="total-price text-center">
+        Total Price: Ksh {{ total_price }}
+    </div>
+
+    <div class="fixed bottom-5 left-1/2 transform -translate-x-1/2 flex gap-6 z-10">
+        <button onclick="window.location.href='/products'" class="btn-custom py-3 px-8 rounded-lg text-xl">Continue Shopping</button>
+        <form action="{{ url_for('place_order') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-green py-3 px-8 rounded-lg text-xl">Confirm Order</button>
+        </form>
+    </div>
+
+    {% else %}
+    <p class="text-xl text-red-500 text-center">Your cart is empty.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0a0f16;
+            color: white;
+        }
+        .login-container {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.6);
+            text-align: center;
+            width: 350px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #555;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            background: #222;
+        }
+        .input-group span {
+            background-color: #444;
+            padding: 10px;
+            font-weight: bold;
+            border-right: 1px solid #555;
+            color: #0f0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: #222;
+            color: white;
+        }
+        .password-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #555;
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+            background: #222;
+        }
+        .password-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: #222;
+            color: white;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #0f0;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0f0;
+            border: none;
+            color: black;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #00ff88;
+        }
+        .container {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0;
+            text-align: center;
+            justify-content: center;
+            border-radius: 5px;
+            background: red;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            width: 35%;
+            transition: opacity 0.5s ease-in-out;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+           from { transform: translateX(100%); }
+           to { transform: translateX(-50%); }
+        }
+        .flash-message { color: white; }
+        .spinner { margin-left: 10px; animation: spin 1s linear infinite; font-size: 16px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Login</h2>
+    <form action="/login" method="POST">
+        <div class="input-group">
+            <span>+254</span>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="tel" name="mobile" placeholder="7xxxxxxxx or 1xxxxxxxx" required pattern="[71][0-9]{8}" value="{{ mobile }}">
+        </div><div class="password-group">        
+        <input type="password" name="password" id="password" placeholder="Password" required minlength="4" value='{{ password }}'>
+        <span class="toggle-password" onclick="togglePassword()">👁</span>
+    </div>
+    <button type="submit" id="submitBtn"><span id="btnText">Login</span><span class="spinner" id="spinner" style="display: none;">⏳</span></button>
+    <p>Don't have an account? <a href="{{ url_for('register') }}" style="color:#0f0;">Register here</a></p>
+</form>
+
+</div><div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div><script>    
+    function togglePassword() {
+        var pass = document.getElementById("password");
+        pass.type = (pass.type === "password") ? "text" : "password";
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        let flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                setTimeout(() => {
+                    msg.remove();
+                }, 500);
+            }, 3000);
+        });
+    });
+    const form = document.querySelector("form");
+    const btnText = document.getElementById("btnText");
+    const spinner = document.getElementById("spinner");
+    const submitBtn = document.getElementById("submitBtn");
+
+    form.addEventListener("submit", function () {
+        btnText.textContent = "Processing...";
+        spinner.style.display = "inline-block";
+        submitBtn.disabled = true;
+    });
+</script></body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About Our Shop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-800 text-white min-h-screen flex items-center justify-center p-6">
+  <div class="bg-gray-900 shadow-xl rounded-2xl p-8 w-full max-w-2xl">
+    
+    <!-- SVG Shop Icon -->
+    <div class="flex justify-center mb-6">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#00f2ff" class="w-24 h-24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75h18M5.25 9.75v10.5a.75.75 0 00.75.75h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 01.75-.75h2.25a.75.75 0 01.75.75v6.75a.75.75 0 00.75.75h3.75a.75.75 0 00.75-.75V9.75M3 9.75L4.5 4.5h15L21 9.75" />
+      </svg>
+    </div>
+
+    <h1 class="text-4xl text-cyan-400 font-bold mb-6 text-center">About Our Shop</h1>
+
+    {% if about %}
+      <div class="text-lg space-y-6">
+        <p class="text-xl"><span class="text-cyan-300 font-semibold">Shop Name:</span> {{ about.shop_name }}</p>
+        <p class="text-xl"><span class="text-green-400 font-semibold">Established:</span> {{ about.date_created }}</p>
+        <p class="text-xl"><span class="text-purple-300 font-semibold">Description:</span> <i>{{ about.description }}</i></p>
+        <p class="text-xl"><span class="text-yellow-300 font-semibold">Owner:</span> {{ about.owner }}</p>
+        <p class="text-xl"><span class="text-pink-300 font-semibold">Contact:</span> <b>{{ about.contact }}</b></p>
+
+        {% if about.logo %}
+          <div class="mt-8 flex justify-center">
+            <img src="{{ about.logo or 'static/default-profile.png'}}" alt="Shop Logo" class="max-w-[200px] rounded-xl shadow-lg">
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <p class="text-center text-gray-300 mt-6 text-xl">No information available at this time.</p>
+    {% endif %}
+
+    <div class="mt-12 text-center">
+      <a href="{{ url_for('user_dashboard') }}" class="text-cyan-300 hover:text-white hover:underline text-2xl transition-all duration-200 ease-in-out">↩ Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+</html>

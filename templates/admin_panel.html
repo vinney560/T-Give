@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Administrative Hybrid Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-980 text-white font-sans p-4">
+  <h1 class="text-3xl font-bold text-center mb-6 text-cyan-400">Administrative Hybrid Panel</h1>
+
+  <!-- USERS SECTION -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-2xl font-semibold text-white">Users</h2>
+      <a href="{{ url_for('manage_users') }}" class="text-cyan-400 hover:text-cyan-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m0 0H5m4 0h10M12 5v14" />
+        </svg> View
+      </a>
+    </div>
+    <div class="overflow-auto rounded-lg shadow">
+      <table class="min-w-full text-sm text-left text-white border border-gray-700">
+        <thead class="bg-gray-800 text-cyan-300">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Mobile</th>
+            <th class="px-4 py-2">Role</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">State</th>
+          </tr>
+        </thead>
+        <tbody class="bg-gray-900">
+          {% for user in users %}
+          <tr class="border-t border-gray-700">
+            <td class="px-4 py-2">{{ user.id }}</td>
+            <td class="px-4 py-2">{{ user.mobile }}</td>
+            <td class="px-4 py-2">{{ user.role }}</td>
+            <td class="px-4 py-2">{{ user.active }}</td>
+            <td class="px-4 py-2">{{ user.agreed }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRODUCTS SECTION -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-2xl font-semibold text-white">Products</h2>
+      <a href="{{ url_for('manage_products') }}" class="text-cyan-400 hover:text-cyan-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m0 0H5m4 0h10M12 5v14" />
+        </svg> View
+      </a>
+    </div>
+    <div class="overflow-auto rounded-lg shadow">
+      <table class="min-w-full text-sm text-left text-white border border-gray-700">
+        <thead class="bg-gray-800 text-cyan-300">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">Name</th>
+            <th class="px-4 py-2">Price (Ksh)</th>
+            <th class="px-4 py-2">Stock</th>
+            <th class="px-4 py-2">Category</th>
+            <th class="px-4 py-2">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody class="bg-gray-900">
+          {% for product in products %}
+          <tr class="border-t border-gray-700">
+            <td class="px-4 py-2">{{ product.id }}</td>
+            <td class="px-4 py-2">{{ product.name }}</td>
+            <td class="px-4 py-2">{{ product.price }}</td>
+            <td class="px-4 py-2">{{ product.stock }}</td>
+            <td class="px-4 py-2">{{ product.category }}</td>
+            <td class="px-4 py-2">{{ product.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ORDERS SECTION -->
+  <div>
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-2xl font-semibold text-white">Orders</h2>
+      <a href="{{ url_for('admin_manage_orders') }}" class="text-cyan-400 hover:text-cyan-200">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m0 0H5m4 0h10M12 5v14" />
+        </svg> View
+      </a>
+    </div>
+    <div class="overflow-auto rounded-lg shadow">
+      <table class="min-w-full text-sm text-left text-white border border-gray-700">
+        <thead class="bg-gray-800 text-cyan-300">
+          <tr>
+            <th class="px-4 py-2">ID</th>
+            <th class="px-4 py-2">User</th>
+            <th class="px-4 py-2">Product</th>
+            <th class="px-4 py-2">Quantity</th>
+            <th class="px-4 py-2">Total Cost</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Location</th>
+            <th class="px-4 py-2">Timestamp</th>
+          </tr>
+        </thead>
+        <tbody class="bg-gray-900">
+          {% for order in orders %}
+          <tr class="border-t border-gray-700">
+            <td class="px-4 py-2">{{ order.id }}</td>
+            <td class="px-4 py-2">{{ order.user.mobile }}</td>
+            <td class="px-4 py-2">{{ order.product.name }}</td>
+            <td class="px-4 py-2">{{ order.quantity }}</td>
+            <td class="px-4 py-2">Ksh {{ order.total }}</td>
+            <td class="px-4 py-2">{{ order.status }}</td>
+            <td class="px-4 py-2">{{ order.location }}</td>
+            <td class="px-4 py-2">{{ order.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

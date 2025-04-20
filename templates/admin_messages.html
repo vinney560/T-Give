@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Messages</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #660000, #ff3333, #660000);
+            color: white;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .message-group {
+            margin-bottom: 15px;
+        }
+
+        .user-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ff6666;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #ff6666;
+            color: white;
+            align-self: flex-start;
+        }
+
+        .admin-reply {
+            background-color: #e0e0e0;
+            color: black;
+            align-self: flex-end;
+            margin-left: 20px;
+            border-left: 3px solid #ff6666;
+            padding-left: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        textarea {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            resize: none;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #ff3333;
+            color: white;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h2>Admin Messages</h2>
+    </div>
+
+    <div class="chat-container" id="chat-container">
+        {% for message in messages %}
+            <div class="message-group">
+                <div class="user-header">{{ message.display_name }}</div>
+                <div class="message user-message">{{ message.content }}</div>
+
+                {% for reply in message.replies %}
+                    <div class="message admin-reply">Admin: {{ reply.content }}</div>
+                {% endfor %}
+
+                <!-- Reply Input for Admin -->
+                <textarea class="reply-input" id="reply-{{ message.id }}" placeholder="Reply to this message..."></textarea>
+                <button onclick="sendReply({{ message.id }})">Reply</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        var socket = io();
+
+        function sendReply(messageId) {
+            let replyContent = document.getElementById(`reply-${messageId}`).value.trim();
+            if (replyContent === "") return;
+
+            socket.emit('admin_reply', { message_id: messageId, content: replyContent });
+
+            // Display reply instantly for admin
+            let chatContainer = document.getElementById("chat-container");
+            let messageGroup = document.getElementById(`reply-${messageId}`).parentElement;
+
+            let adminReply = document.createElement("div");
+            adminReply.classList.add("message", "admin-reply");
+            adminReply.innerText = "Admin: " + replyContent;
+
+            messageGroup.appendChild(adminReply);
+
+            // Clear input after sending
+            document.getElementById(`reply-${messageId}`).value = "";
+        }
+
+        // Listen for new user messages
+        socket.on('receive_user_message', function(data) {
+            let chatContainer = document.getElementById("chat-container");
+
+            let messageGroup = document.createElement("div");
+            messageGroup.classList.add("message-group");
+
+            let userHeader = document.createElement("div");
+            userHeader.classList.add("user-header");
+            userHeader.innerText = data.mobile;
+
+            let userMessage = document.createElement("div");
+            userMessage.classList.add("message", "user-message");
+            userMessage.innerText = data.content;
+
+            let replyInput = document.createElement("textarea");
+            replyInput.classList.add("reply-input");
+            replyInput.id = "reply-" + data.message_id;
+            replyInput.placeholder = "Reply to this message...";
+
+            let replyButton = document.createElement("button");
+            replyButton.innerText = "Reply";
+            replyButton.onclick = function () {
+                sendReply(data.message_id);
+            };
+
+            messageGroup.appendChild(userHeader);
+            messageGroup.appendChild(userMessage);
+            messageGroup.appendChild(replyInput);
+            messageGroup.appendChild(replyButton);
+
+            chatContainer.appendChild(messageGroup);
+        });
+    </script>
+</body>
+</html>

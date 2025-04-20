@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Message</title>
+  <style>
+    body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: #1c1c1c; padding: 20px; border-radius: 10px; }
+    textarea { width: 90%; padding: 10px; margin: 10px 0; border: none; border-radius: 5px; }
+    button { padding: 10px 20px; background: cyan; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #00cccc; }
+  </style>
+</head>
+<body>
+  <h1>View Message</h1>
+  <div class="container">
+    <p><strong>From:</strong> {{ message.sender.mobile }}</p>
+    <p><strong>Date:</strong> {{ message.created_at.strftime('%Y-%m-%d') }}</p>
+    <p><strong>Content:</strong> {{ message.content }}</p>
+    <form action="" method="POST">
+      <textarea name="reply" placeholder="Type your reply here"></textarea><br>
+      <button type="submit">Send Reply</button>
+    </form>
+  </div>
+</body>
+</html>

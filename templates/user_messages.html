@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --bg-light: #f8f9fa;
+            --bg-dark: #1e293b;
+            --text-light: #333;
+            --text-dark: #f1f5f9;
+            --admin-msg: #e2e8f0;
+            --user-msg: #4361ee;
+            --typing-indicator: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .header {
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header i {
+            font-size: 1.2rem;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background-color: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .admin-message {
+            background-color: var(--admin-msg);
+            color: var(--text-light);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 4px;
+            display: block;
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 12px;
+            background: white;
+            border-top: 1px solid #e5e5e5;
+            gap: 10px;
+            align-items: center;
+        }
+
+        textarea {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 0;
+            width: 48px;
+            height: 48px;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            color: var(--typing-indicator);
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status i {
+            font-size: 0.7rem;
+        }
+
+        /* Scrollbar styling */
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .message {
+                max-width: 90%;
+                padding: 10px 14px;
+            }
+            
+            .header {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <i class="fas fa-arrow-left"></i>
+        <h2>Support Chat</h2>
+    </div>
+
+    <div class="chat-container" id="chat-container">
+        <!-- Messages will be inserted here by JavaScript -->
+        <div class="typing-indicator" id="typing-indicator" style="display: none;">
+            Admin is typing...
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <textarea id="message-input" placeholder="Type your message..." rows="1"></textarea>
+        <button id="send-button" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <script>
+        // Configuration
+        const USER_ID = "user_" + Math.floor(Math.random() * 1000); // Replace with actual user ID
+        const socket = io.connect(window.location.origin, {
+            query: `user_id=${USER_ID}`
+        });
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            
+            // Send typing indicator
+            socket.emit('typing', {
+                user_id: USER_ID,
+                is_typing: this.value.length > 0
+            });
+        });
+
+        // Send message on Enter (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Send message function
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (content) {
+                // Create message element immediately for instant feedback
+                appendMessage(content, 'user-message', 'Just now', 'Sending...');
+                
+                // Emit to server
+                socket.emit('user_message', {
+                    user_id: USER_ID,
+                    content: content
+                });
+                
+                // Clear input
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+            }
+        }
+
+        // Append message to chat
+        function appendMessage(content, type, timestamp, status) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            messageDiv.innerHTML = `
+                ${content}
+                <div class="timestamp">${timestamp}</div>
+                ${status ? `<div class="status"><i class="fas fa-check"></i> ${status}</div>` : ''}
+            `;
+            
+            chatContainer.insertBefore(messageDiv, typingIndicator);
+            scrollToBottom();
+            
+            return messageDiv;
+        }
+
+        // Update message status (delivered, read)
+        function updateMessageStatus(messageElement, status) {
+            const statusElement = messageElement.querySelector('.status');
+            if (statusElement) {
+                statusElement.innerHTML = `<i class="fas fa-check"></i> ${status}`;
+            }
+        }
+
+        // Scroll to bottom of chat
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Socket.io event listeners
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('receive_admin_reply', (data) => {
+            appendMessage(data.content, 'admin-message', data.timestamp);
+        });
+
+        socket.on('message_received', (data) => {
+            // Find the last user message and update status
+            const userMessages = document.querySelectorAll('.user-message');
+            if (userMessages.length > 0) {
+                updateMessageStatus(userMessages[userMessages.length - 1], 'Delivered');
+            }
+        });
+
+        socket.on('admin_typing', (data) => {
+            typingIndicator.style.display = data.is_typing ? 'block' : 'none';
+            scrollToBottom();
+        });
+
+        // Initial scroll to bottom
+        window.addEventListener('load', scrollToBottom);
+    </script>
+</body>
+</html>

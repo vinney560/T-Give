@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4 relative">
+
+    <!-- Flash Messages -->
+    <div class="absolute top-4 left-1/2 transform -translate-x-1/2 z-50">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="bg-green-600 text-white rounded-lg shadow-md px-6 py-3 animate-slide-in opacity-100 transition-opacity duration-500">
+                    {% for category, message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Profile Container -->
+    <div class="bg-gray-800 shadow-lg rounded-2xl w-full max-w-md p-6 text-center space-y-6 border border-cyan-400">
+
+        <!-- Profile Picture -->
+        <div class="flex flex-col items-center space-y-3">
+            <img src="{{ user.profile_image or '/static/default-profile.png' }}" id="profile-img" class="w-28 h-28 rounded-full border-4 border-cyan-400 object-cover shadow-md" alt="Profile Picture">
+            <form action="{{ url_for('update_profile_pic') }}" method="POST" enctype="multipart/form-data" class="w-full">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="profile-pic-input" class="cursor-pointer text-cyan-400 hover:text-cyan-300 transition">
+                    <svg class="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Change Picture
+                </label>
+                <input type="file" id="profile-pic-input" name="profile_pic" class="hidden" accept="image/*">
+                <button type="submit" class="mt-3 w-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold py-2 rounded transition">Upload</button>
+            </form>
+        </div>
+
+        <!-- User Info -->
+        <p class="text-cyan-300"><strong>Mobile:</strong> {{ user.mobile }}</p>
+
+        <!-- Update Location -->
+        <form action="{{ url_for('update_location') }}" method="POST" class="space-y-2 text-left">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="location" class="text-sm text-gray-300">Location</label>
+            <input type="text" id="location" name="location" value="{{ user.location or '' }}" required
+                class="w-full bg-gray-700 border border-cyan-400 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <button type="submit" class="w-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold py-2 rounded transition">Update Location</button>
+        </form>
+
+        <!-- Update Email -->
+        <form action="{{ url_for('update_email') }}" method="POST" class="space-y-2 text-left">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label for="email" class="text-sm text-gray-300">Email</label>
+            <input type="email" id="email" name="email" value="{{ user.email or '' }}" required
+                class="w-full bg-gray-700 border border-cyan-400 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <button type="submit" class="w-full bg-cyan-400 hover:bg-cyan-300 text-black font-semibold py-2 rounded transition">Update Email</button>
+        </form>
+
+        <!-- Navigation Buttons -->
+        <div class="flex flex-col gap-3 mt-6">
+            <a href="{{ url_for('account_settings') }}" class="w-full bg-gray-700 hover:bg-gray-600 text-cyan-300 font-semibold py-2 rounded transition flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg> Account Settings
+            </a>
+            <a href="{{ url_for('products') }}" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-semibold py-2 rounded transition flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M3 3h18M9 3v18m6-18v18" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg> Back to Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Slide-in animation -->
+    <style>
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%);
+                opacity: 1;
+            }
+        }
+        .animate-slide-in {
+            animation: slide-in 0.4s ease-out;
+        }
+    </style>
+
+    <script>
+        document.getElementById('profile-pic-input')?.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-img').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Auto-fade flash messages
+        document.addEventListener("DOMContentLoaded", function () {
+            const flash = document.querySelector('.animate-slide-in');
+            if (flash) {
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 500);
+                }, 3000);
+            }
+        });
+    </script>
+
+</body>
+</html>

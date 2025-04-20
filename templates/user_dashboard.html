@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          boxShadow: {
+            glow: '0 0 15px rgba(0,255,255,0.6)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glow-hover:hover {
+      box-shadow: 0 0 15px rgba(0,255,255,0.6);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black min-h-screen flex justify-center items-start p-6 text-white">
+
+  <div class="w-full max-w-6xl flex flex-col md:flex-row gap-6">
+
+    <!-- Profile Section -->
+    <div class="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl w-full md:w-1/3 border border-white/20">
+      <div class="flex flex-col items-center">
+        <img src="{{ user.profile_image or '/static/default-profile.png' }}"
+             alt="Profile"
+             class="w-28 h-28 rounded-full ring-4 ring-cyan-400 shadow-lg object-cover"/>
+        <h2 class="text-2xl font-bold mt-4">{{ user.name }}</h2>
+        <p class="text-sm text-gray-300 mt-1">Mobile: {{ user.mobile }}</p>
+        <p class="text-sm text-gray-300">Email: {{ user.email }}</p>
+        <p class="text-sm text-gray-400">Location: {{ user.location or 'Not Set' }}</p>
+      </div>
+    </div>
+
+    <!-- Menu Section -->
+    <div class="bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-xl w-full md:w-2/3 border border-white/20">
+      <h2 class="text-2xl font-semibold mb-6 text-cyan-400">Dashboard Menu</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+
+        <!-- Profile -->
+        <a href="{{ url_for('profile') }}"
+           class="glow-hover transition-all duration-200 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.657 6.879 1.804M15 11a3 3 0 10-6 0 3 3 0 006 0z"/>
+          </svg>
+          Profile
+        </a>
+
+        <!-- Shop Now -->
+        <a href="{{ url_for('products') }}"
+           class="glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 5m0 0a1 1 0 001 1h12a1 1 0 001-1m-14.6 0L5 6"/>
+          </svg>
+          Shop Now
+        </a>
+
+        <!-- View Cart with Badge -->
+        <a href="{{ url_for('cart') }}"
+           class="relative glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.4 5m0 0a1 1 0 001 1h12a1 1 0 001-1m-14.6 0L5 6"/>
+          </svg>
+          View Cart
+          {% if cart_count > 0 %}
+            <span class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full animate-pulse">
+              {{ cart_count }}
+            </span>
+          {% endif %}
+        </a>
+
+        <!-- About Us -->
+        <a href="{{ url_for('about') }}"
+           class="glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M13 16h-1v-4h-1m1-4h.01M12 12h.01M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+          </svg>
+          About Us
+        </a>
+
+        <!-- Services -->
+        <a href="{{ url_for('services') }}"
+           class="glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9.75 3L6 5.25v4.5l3.75 2.25L13.5 9.75v-4.5L9.75 3zM9.75 12.75v5.25M9.75 21H3v-5.25"/>
+          </svg>
+          Services
+        </a>
+
+        <!-- Messages with Badge -->
+        <a href="{{ url_for('messaging.messages') }}"
+           class="relative glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M7 8h10M7 12h6m-7.293 7.293A8 8 0 1120 12.5V21l-4.707-1.707"/>
+          </svg>
+          Message Support 
+        </a>
+
+        <!-- Orders -->
+        <a href="{{ url_for('order_history') }}"
+           class="glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Order History&Tracking
+        </a>
+
+        <!-- Settings -->
+        <a href="{{ url_for('account_settings') }}"
+           class="glow-hover bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0a1.007 1.007 0 001.286.63l.237-.095a.996.996 0 011.147.416l.185.31c.513.859.267 1.946-.574 2.443l-.437.256a1 1 0 000 1.732l.437.256c.841.497 1.087 1.584.574 2.443l-.185.31a.996.996 0 01-1.147.416l-.237-.095a1.007 1.007 0 00-1.286.63c-.3.921-1.603.921-1.902 0a1.007 1.007 0 00-1.286-.63l-.237.095a.996.996 0 01-1.147-.416l-.185-.31c-.513-.859-.267-1.946.574-2.443l.437-.256a1 1 0 000-1.732l-.437-.256c-.841-.497-1.087-1.584-.574-2.443l.185-.31a.996.996 0 011.147-.416l.237.095a1.007 1.007 0 001.286-.63z"/>
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+          </svg>
+          Settings
+        </a>
+
+        <!-- Logout -->
+        <a href="{{ url_for('logout') }}"
+           class="glow-hover bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 col-span-full">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 11-4 0v-1m0-8V7a2 2 0 114 0v1"/>
+          </svg>
+          Logout
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

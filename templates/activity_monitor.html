@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Admin Activity Monitor</title>
+
+    <!-- Core Dependencies -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons@latest/iconfont/tabler-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+        :root {
+            --cyber-cyan: #00f9f9;
+            --cyber-purple: #6c00ff;
+            --bg-dark: #0a0c12;
+            --surface: #13161f;
+            --error-red: #ff4d4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #e3e9ff;
+            min-height: 100vh;
+        }
+
+        .cyber-container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .activity-header {
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--cyber-purple);
+            margin-bottom: 2rem;
+        }
+
+        .activity-header h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(45deg, var(--cyber-cyan), var(--cyber-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cyber-table {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 2px solid var(--cyber-purple);
+            overflow: hidden;
+        }
+
+        .connection-status {
+            padding: 1rem;
+            background: rgba(108, 0, 255, 0.1);
+            border-bottom: 2px solid var(--cyber-purple);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .scroll-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            font-size: 1rem;
+        }
+
+        td {
+            border-bottom: 2px solid var(--cyber-cyan);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: rgba(108, 0, 255, 0.1);
+        }
+
+        @media screen and (max-width: 768px) {
+            th {
+                font-size: 0.9rem;
+                padding: 0.8rem;
+            }
+
+            td {
+                font-size: 0.85rem;
+                padding: 0.6rem;
+            }
+
+            .device-info {
+                max-width: 150px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            th {
+                display: none;
+            }
+
+            td {
+                display: block;
+                text-align: left;
+                width: 100%;
+                padding: 0.5rem;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: block;
+                color: var(--cyber-purple);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cyber-container">
+        <header class="activity-header">
+            <h1>
+                <i class="ti ti-activity"></i>
+                LIVE ADMIN ACTIVITY STREAM
+            </h1>
+        </header>
+
+        <div class="cyber-table">
+            <div class="connection-status" id="connectionStatus">
+                <i class="ti ti-link"></i>
+                <span>INITIALIZING SECURE CONNECTION...</span>
+            </div>
+            <div class="scroll-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>TIMESTAMP</th>
+                            <th>ADMIN</th>
+                            <th>ACTION</th>
+                            <th>TARGET</th>
+                            <th>IDENTIFIER</th>
+                            <th>IP</th>
+                            <th>DEVICE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityStream">
+                        {% for activity in activities %}
+                        <tr>
+                            <td data-label="TIMESTAMP">{{ activity.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td data-label="ADMIN">@{{ activity.admin.mobile }}</td>
+                            <td data-label="ACTION">{{ activity.action }}</td>
+                            <td data-label="TARGET">
+                                <span class="badge badge-{{ activity.target_type }}">{{ (activity.target_type or 'system')|upper }}</span>
+                            </td>
+                            <td data-label="IDENTIFIER">
+                                {% if activity.target_id %} #{{ activity.target_id }} {% else %} <span class="na">N/A</span> {% endif %}
+                            </td>
+                            <td data-label="IP" class="ip-address">{{ activity.ip_address }}</td>
+                            <td data-label="DEVICE" class="device-info" title="{{ activity.user_agent }}">{{ activity.user_agent|truncate(35, True) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('/activities', {
+            transports: ['websocket'],
+            reconnectionDelay: 3000,
+            reconnectionAttempts: 5,
+            auth: {
+                token: "{{ session.csrf_token }}"
+            }
+        });
+
+        socket.on('connect', () => {
+            document.getElementById('connectionStatus').innerHTML = `
+                <i class="ti ti-shield-check" style="color: var(--cyber-cyan)"></i>
+                <span>SECURE CONNECTION ESTABLISHED • ${new Date().toLocaleTimeString()}</span>
+            `;
+        });
+
+        socket.on('disconnect', (reason) => {
+            document.getElementById('connectionStatus').innerHTML = `
+                <i class="ti ti-shield-x" style="color: var(--error-red)"></i>
+                <span>CONNECTION LOST • ${reason}</span>
+            `;
+        });
+
+        socket.on('new_activity', (data) => {
+            const tbody = document.getElementById('activityStream');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${data.timestamp}</td>
+                <td>@${data.admin}</td>
+                <td>${data.action}</td>
+                <td><span class="badge badge-${data.target_type}">${data.target_type.toUpperCase()}</span></td>
+                <td>${data.target_id ? '#'+data.target_id : '<span class="na">N/A</span>'}</td>
+                <td class="ip-address">${data.ip}</td>
+                <td class="device-info" title="${data.device}">${data.device}</td>
+            `;
+
+            tbody.insertBefore(newRow, tbody.firstChild);
+            if (tbody.children.length > 100) {
+                tbody.removeChild(tbody.lastChild);
+            }
+        });
+    </script>
+</body>
+</html>

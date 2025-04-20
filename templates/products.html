@@ -1,0 +1,331 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Products</title>  
+  <style>  
+    body {
+      background: #0e0e0e;  
+      color: #fff;  
+      font-family: 'Segoe UI', sans-serif;  
+      margin: 0;  
+      padding: 0;  
+      text-align: center;  
+      padding-top: 200px;  
+    }  
+    .header {  
+      position: fixed;  
+      top: 0;  
+      left: 0;  
+      width: 100%;  
+      height: 150px;  
+      background: linear-gradient(to right, #00cccc, #003333);  
+      display: flex;  
+      flex-direction: row;  
+      justify-content: center;  
+      align-items: center;  
+      padding: 10px 20px;  
+      z-index: 1000;  
+      box-shadow: 0 3px 10px rgba(0, 255, 255, 0.5);  
+      clip-path: polygon(0 0, 100% 0, 100% 85%, 100% 100%, 0 100%, 0 85%);  
+    }
+    .header-content {  
+      position: fixed;  
+      justify-content: space-between;  
+      align-items: center;  
+      width: 100%;  
+      max-width: 1100px;  
+    }  
+    .header h1 {  
+      margin: 0;  
+      font-size: 40px;  
+      color: cyan;  
+      font-weight: bold;  
+      text-transform: uppercase;  
+      letter-spacing: 2px;  
+    }
+    .products-label { margin: 25px 0; font-size: 30px; font-weight: bold; color: white; text-transform: uppercase;background: linear-gradient(45deg, #ffcc00, #ff6600); display: inline-block; padding: 16px 28px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(255, 204, 0, 0.5); animation: glow 1.0s infinite alternate; }
+    .container { margin: auto; padding: 60px; }  
+    .search-container { position: fixed; top: 171px; z-index: 1201; width: 100vw; margin: 0 auto; z-index: 10; } 
+    .search-bar { display: flex; align-items: center; background: #0e0e0e; border: 2px solid #00f7ff; border-radius: 30px; padding: 12px 30px; width: 93%; box-shadow: 0 0 15px rgba(0, 247, 255, 0.4); }  
+    .search-bar input { flex: 1; background: transparent; border: none; outline: none; padding: 10px; color: #00f7ff; font-size: 1.4rem; }  
+    .search-icon { width: 20px; height: 20px; margin-right: 10px; color: #00f7ff; }
+    .search-icon-btn { background: transparent; border: none; cursor: pointer; padding: 10px; }  
+    .suggestion-list { position: absolute; top: 105%; width: 99%; background: #101010; border: 1px solid #00f7ff55; border-radius: 10px; max-height: 210px; overflow-y: auto; list-style: none; padding: 0; margin: 5px 0 0; }  
+    .suggestion-list li a { display: block; padding: 20px 25px; color: #00f7ff; text-decoration: none; transition: background 0.3s; font-size: 1.4rem; }  
+    .suggestion-list li a:hover { background: #00f7ff22; }   
+    @keyframes glow { from { box-shadow: 0px 0px 10px rgba(255, 204, 0, 0.5); } to { box-shadow: 0px 0px 20px rgba(255, 204, 0, 1); }  }
+    h2 { margin: 20px; border-left: 4px solid #0ff; padding-left: 10px; font-size: 1.4rem; }
+    .section { margin-bottom: 40px; font-size: 2.0rem; }
+    .horizontal-scroll { display: flex; overflow-x: auto;  gap: 15px;  padding: 0 20px; scroll-snap-type: x mandatory; }
+    .horizontal-scroll::-webkit-scrollbar { height: 5px; }
+    .horizontal-scroll::-webkit-scrollbar-thumb {  background: #0ff; border-radius: 6px; }
+    .product-card { flex: 0 0 auto; width: 295px; background: #1c1c1c; border: 1px solid #333; border-radius: 12px; padding: 12px; scroll-snap-align: start;   box-shadow: 0 0 10px rgba(0,255,255,0.1); transition: transform 0.3s ease; position: relative; }
+    .product-card:hover { transform: scale(1.03); }
+    .product-card img { width: 100%; height: 70%; object-fit: cover; border-radius: 8px; }
+    .product-name { margin: 10px 0 5px; font-size: 1.4rem; font-weight: 600; }
+    .product-price { color: #0ff; font-weight: 450; }
+    .product-rating { margin: 6px 0; font-size: 1.3rem; color: #ffc107; }
+    .view-link { display: inline-block; margin-top: 10px; padding: 10px 20px; font-size: 1.3rem; background: #0ff; color: #000;  border-radius: 6px; text-align: center; text-decoration: none; font-weight: bold; }
+     .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,3fr)); gap: 5px; text-align: center; padding: 5px; }  
+    @media (max-width: 600px) { .product-card { width: 180px; } }
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 200px;
+      max-width: 90%;
+      padding: 20px 35px;
+      font-size: 1.6rem;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      text-align: center;
+      z-index: 10006;
+      opacity: 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.show { opacity: 1; top: 30px; }
+    .toast::before {
+      content: '';
+      width: 27px;
+      height: 27px;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .toast.success {
+      background: #2ecc71;
+      border-left: 5px solid #27ae60;
+    }
+    .toast.error {
+      background: #e74c3c;
+      border-left: 5px solid #c0392b;
+    }
+    .toast.success::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    }
+    .toast.error::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+    }
+    .view-cart { 
+      position: fixed; 
+      bottom: 20px; 
+      right: 20px; 
+      padding: 17px 34px;
+      background: cyan; 
+      color: black; 
+      border: none; 
+      border-radius: 10px; 
+      cursor: pointer; 
+      font-size: 20px;
+      font-weight: bold; 
+      z-index: 1000;
+    }
+    .view-cart:hover { 
+      background: #00cccc; 
+    }
+    .settings-btn { 
+      position: fixed; 
+      top: 20px; 
+      left: 20px;
+      background: transparent; 
+      color: black; 
+      border: none; 
+      cursor: pointer; 
+      font-size: 70px; 
+      font-weight: bold;
+      z-index: 1551;
+    }
+    .settings-btn:hover { 
+      background: #00cccc;
+    }
+
+  </style>  
+</head>  
+<body><div class="header">  
+    <div class="header-content">  
+      <h1>T-Give Nexus</h1>  
+    </div>  
+  </div>  
+  <div id="toast" class="toast"></div>  
+  <div class="search-container">  
+    <div class="search-bar">  
+      <svg viewBox="0 0 24 24" class="search-icon">  
+        <path d="M21 21l-4.35-4.35M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>  
+      </svg>  
+      <input type="text" id="liveSearch" placeholder="Search products...">  
+      <button id="liveSearch" class="search-icon-btn" onclick="searchProducts()">  
+   </div>  
+   <ul id="suggestions" class="suggestion-list"></ul>  
+</div>  
+  <div class="container"><p class="products-label">OUR PRODUCTS</p></div>  
+  <div class="section">  
+    <h2>New Arrivals</h2>  
+    <div class="horizontal-scroll">  
+      {% for product in new_arrivals %}  
+        <div class="product-card">  
+          <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy"></a> 
+          <div class="product-name">{{ product.name }}</div>  
+          <div class="product-price">Ksh {{ product.price }}</div>  
+          <div class="product-rating">  
+            Rating: {{ product.get_average_rating() }} / 5  
+          </div> 
+        </div>  
+      {% endfor %}  
+    </div>  
+  </div><div class="section">  
+    <h2>Top Rated</h2>  
+    <div class="horizontal-scroll">  
+      {% for product in top_rated %}  
+        <div class="product-card">  
+          <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy"></a>
+          <div class="product-name">{{ product.name }}</div>  
+          <div class="product-price">Ksh {{ product.price }}</div>  
+          <div class="product-rating">  
+            Rating: {{ product.get_average_rating() }} / 5  
+          </div>  
+        </div>  
+      {% endfor %}
+    </div>
+  </div><div class="section">  
+    <h2>All Products</h2>  
+    <div class="products-grid">  
+      {% for product in all_products %}  
+        <div class="product-card">  
+          <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy"></a>
+          <div class="product-name">{{ product.name }}</div>  
+          <div class="product-price">Ksh {{ product.price }}</div>  
+          <div class="product-rating">  
+            Rating: {{ product.get_average_rating() }} / 5  
+          </div> 
+        </div>  
+      {% endfor %}  
+    </div>  
+  </div>
+    {% for category, products in category_products.items() %}
+    <div class="section">
+      <h2>{{ category }}</h2>
+      <div class="horizontal-scroll">
+        {% for product in products %}
+          <div class="product-card">
+            <a href="{{ url_for('product_details', product_id=product.id) }}">
+              <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy">
+            </a>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">Ksh {{ product.price }}</div>
+            <div class="product-rating">
+              Rating: {{ product.get_average_rating() }} / 5
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+  <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
+  <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'"><b>≡</b></button>
+  <div id="toast" class="toast"></div>
+  <script>  
+      // Show toast notifications  
+      function showToast(message, success = true) {
+          const toast = document.getElementById('toast');
+          const typeClass = success ? 'success' : 'error';
+      
+          toast.classList.remove('show', 'success', 'error');
+          clearTimeout(toast.timeoutId);
+      
+          toast.textContent = message;
+          toast.classList.add(typeClass);
+          void toast.offsetHeight;
+          toast.classList.add('show');
+          toast.timeoutId = setTimeout(() => {
+             toast.classList.remove('show');
+          }, 3000);
+        }
+    // Convert Flask flash messages to toasts
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}  
+                showToast("{{ message }}", "{{ category }}" === 'success');
+            {% endfor %}  
+       {% endif %}  
+   {% endwith %}
+   const searchInput = document.getElementById('liveSearch');  
+   const suggestions = document.getElementById('suggestions');
+   searchInput.addEventListener('input', function () {  
+       const query = this.value.trim();  
+
+       if (query.length < 1) {  
+          suggestions.innerHTML = '';  
+          return;  
+       }
+       fetch(`/search-suggestions?q=${encodeURIComponent(query)}`)  
+       .then(response => response.json())  
+       .then(data => {  
+           suggestions.innerHTML = '';  
+           data.results.forEach(product => {  
+               const li = document.createElement('li');  
+           li.innerHTML = `<a href="/product/${product.id}">${product.name}</a>`;  
+           suggestions.appendChild(li);  
+         });  
+      });  
+   });  
+
+   searchInput.addEventListener('keydown', function (e) {
+     if (e.key === 'Enter') {
+       const query = this.value.trim();
+       if (query) {
+         window.location.href = `/search?q=${encodeURIComponent(query)}`;
+       }
+     }
+   });
+    // Real-time search with debouncing
+    let searchTimeout;  
+    document.getElementById('liveSearch').addEventListener('input', function(e) {  
+        clearTimeout(searchTimeout);  
+        searchTimeout = setTimeout(() => {  
+            searchProducts(e.target.value);  
+        }, 300);  
+    });
+    function searchProducts(searchTerm) {  
+        const normalizedTerm = searchTerm.toLowerCase().trim();  
+        const products = document.querySelectorAll('.product-name');  
+        products.forEach(product => {  
+           const name = product.dataset.name;  
+           const description = product.dataset.description;  
+           const match = name.includes(normalizedTerm) || description.includes(normalizedTerm);  
+           product.style.display = match ? 'block' : 'none';  
+        });  
+        document.querySelector('.product-card').classList.add('searching');  
+        setTimeout(() => {  
+            document.querySelector('.products').classList.remove('searching');  
+        }, 300);  
+    }
+    document.getElementById('liveSearch').addEventListener('keyup', function(event) {  
+        if (event.key === 'Enter') {  
+          searchProducts();  
+      }  
+   });
+   const scrollContainer = document.querySelector('.horizontal-scroll');
+   const productCardWidth = document.querySelector('.product-card')?.offsetWidth || 200; // Fallback to 200px if not found
+   let scrollPosition = 0;
+
+   setInterval(() => {
+    // Scroll one card forward
+       scrollPosition += productCardWidth;
+
+    // If end reached, reset to start
+       if (scrollPosition >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
+    scrollPosition = 0;
+    }
+
+       scrollContainer.scrollTo({
+           left: scrollPosition,
+           behavior: 'smooth'
+       });
+   }, 3000); // 3 seconds
+</script></body>
+</html>

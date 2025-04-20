@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat with {{ user.mobile }}</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body { background: #0f0f0f; color: #00ffff; font-family: 'Segoe UI', sans-serif; }
+    #chat { width: 90%; margin: auto; max-width: 600px; }
+    #messages { height: 400px; overflow-y: scroll; border: 1px solid #00ffff; padding: 10px; margin-bottom: 10px; }
+    .input-area {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background: #121212;
+    }
+    .input-area input {
+      flex: 1;
+      background: #1A1A1A;
+      border: none;
+      outline: none;
+      padding: 10px;
+      border-radius: 20px;
+      color: #fff;
+      margin-right: 10px;
+    }
+    .send-btn {
+      width: 50px;
+      height: 50px;
+      border: none;
+      background: #3a3a3a;
+      border-radius: 50%;
+      color: #ccc;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s, color 0.3s;
+      cursor: pointer;
+    }
+    .send-btn.active {
+      background: #00a400;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <h2>Chat with {{ user.mobile }}</h2>
+    <div id="messages">
+      {% for msg in messages %}
+        <p><strong>{{ msg.sender }}</strong> [{{ msg.timestamp.strftime('%H:%M') }}]: {{ msg.content }}</p>
+      {% endfor %}
+    </div>
+    <div class="input-area">
+      <input type="text" id="chatInput" placeholder="Type your message..." autocomplete="off">
+      <button class="send-btn" id="sendBtn"><i class="fa-solid fa-microphone"></i></button>
+    </div>
+  </div>
+  <script>
+    const socket = io();
+    const room = "{{ room }}";
+    socket.emit('join', { 'room': room });
+
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn   = document.getElementById('sendBtn');
+
+    chatInput.addEventListener('input', () => {
+      if (chatInput.value.trim() === '') {
+        sendBtn.classList.remove('active');
+        sendBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+      } else {
+        sendBtn.classList.add('active');
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+      }
+    });
+
+    sendBtn.addEventListener('click', () => {
+      if (chatInput.value.trim() !== "") {
+        socket.emit('text', { 'room': room, 'msg': chatInput.value, 'sender': 'admin' });
+        chatInput.value = "";
+        sendBtn.classList.remove('active');
+        sendBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+      }
+    });
+
+    socket.on('message', function(data) {
+      const messagesDiv = document.getElementById('messages');
+      messagesDiv.innerHTML += `<p><strong>${data.sender}</strong> [${data.timestamp}]: ${data.msg}</p>`;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+  </script>
+  <!-- Include Font Awesome JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>500 Internal Server Error</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 30px;
+      padding: 50px;
+    }
+    a {
+      color: cyan;
+    }
+  </style>
+</head>
+<body>
+  <h1><span style="color: yellow">500 Internal Server Error</span></h1>
+  <p>Something went wrong on our end. Please try again later.</p>
+  <a href="{{ url_for('home') }}">Return Home</a>
+</body>
+</html>

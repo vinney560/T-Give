@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Users</title>
+  <style>
+    body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
+    table { width: 90%; margin: auto; border-collapse: collapse; font-size: 22px; }
+    th, td { padding: 10px; border: 1px solid #555; }
+    th { background: #333; color: cyan; }
+    button { padding: 6px 12px; background: cyan; border: none; border-radius: 5px; cursor: pointer; margin: 2px; font-size: 18px; }
+    .btn { 
+      margin-top: 20px;
+      position: fixed;
+      top: 20px;
+      left: 10px;
+      padding: 10px 20px; 
+      font-size: 16px; 
+      border: none; 
+      background: cyan; 
+      color: black; 
+      cursor: pointer; 
+      border-radius: 5px; 
+      transition: 0.3s;
+    }
+    .btn:hover { 
+      background: white; 
+      color: black;
+    }
+    button:hover { background: #00cccc; }
+    .toast::before {content: ''; width: 24px; height: 24px; background-size: contain; background-repeat: no-repeate; }
+    .toast.success { background: #2ecc71; border-left: 5px solid #27ae60; }
+    .toast.error { background: #e74c3c;  border-left: 5px solid #c0392b; }
+    .toast.success::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+    }
+    .toast.error::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+    }
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 5px;
+      z-index: 10000;
+    }
+
+    .toast {
+      min-width: 150px;
+      max-width: 90%;
+      padding: 12px 25px;
+      border-radius: 8px;
+      background: #222;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.exit {
+      opacity: 0;
+      transform: translateY(-20px);
+    }           
+  </style>
+</head>
+<body>
+  <h1>Manage Users</h1><div id="toast-container" class="toast-container"></div>
+  <button class="btn" onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Mobile</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.mobile }}</td>
+      <td>{{ user.role }}</td>
+      <td>{{ user.active }}</td>
+      <td>
+        <form action="{{ url_for('admin_ban_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Ban</button>
+        </form>
+        <form action="{{ url_for('admin_unban_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">  
+          <button type="submit">Unban</button>
+        </form>
+        <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">    
+          <button type="submit">Delete</button>
+        </form>
+        <form action="{{ url_for('admin_promote_user', user_id=user.id) }}" method="POST" style="display:inline;">  
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Promote</button>
+        </form>
+        <form action="{{ url_for('admin_demote_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Demote</button>
+        </form>
+        <form action="{{ url_for('admin_deactivate_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Deactivate</button>
+        </form>
+        <form action="{{ url_for('admin_activate_user', user_id=user.id) }}" method="POST" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit">Activate</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table><script>
+     function showToast(message, success = true) {
+       const container = document.getElementById('toast-container');
+       const toast = document.createElement('div');
+       const typeClass = success ? 'success' : 'error';
+    
+       toast.className = `toast ${typeClass}`;
+       toast.innerHTML = `
+         <div class="toast-icon"></div>
+         ${message}
+      `;
+
+       container.prepend(toast);
+       setTimeout(() => toast.classList.add('show'), 10);
+    
+       setTimeout(() => {
+         toast.classList.add('exit');
+         setTimeout(() => toast.remove(), 300);
+       }, 3000);
+     }
+    // Convert Flask flash messages to toasts
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}  
+                showToast("{{ message }}", "{{ category }}" === 'success');
+            {% endfor %}  
+       {% endif %}  
+   {% endwith %}  
+</script></body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Email Management</title>
+  <style>
+    body { 
+      background: #0A0A0A; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      text-align: center; 
+    }
+    h1, h2 { 
+      color: cyan; 
+      margin-bottom: 10px; 
+    }
+    .section { 
+      margin: 20px auto; 
+      width: 90%; 
+      padding: 10px; 
+      border-radius: 8px; 
+      background: #121212; 
+      box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.5);
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 10px; 
+    }
+    th, td { 
+      padding: 10px; 
+      border: 1px solid #555; 
+      text-align: center; 
+    }
+    th { 
+      background: #222; 
+      color: cyan; 
+      font-weight: bold;
+    }
+    tr:nth-child(even) { 
+      background: #181818; 
+    }
+    tr:hover { 
+      background: rgba(0, 255, 255, 0.1); 
+    }
+    button { 
+      margin-top: 20px;
+      position: fixed;
+      top: 20px;
+      left: 10px;
+      padding: 10px 20px; 
+      font-size: 16px; 
+      border: none; 
+      background: cyan; 
+      color: black; 
+      cursor: pointer; 
+      border-radius: 5px; 
+      transition: 0.3s;
+    }
+    button:hover { 
+      background: white; 
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Email Management</h1>
+  <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+
+  <div class="section">
+    <h2>Users Email Addresses</h2>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Mobile</th>
+        <th>Email Address</>
+        <th>Role</th>
+      </tr>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.mobile }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+    </table>
+  </div>
+</body>
+</html>

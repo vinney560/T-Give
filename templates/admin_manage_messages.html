@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Message Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --bg-light: #f8f9fa;
+            --bg-dark: #1e293b;
+            --text-light: #333;
+            --text-dark: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .header {
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-dark {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message-group {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .dark-mode .message-group {
+            background: #334155;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-header {
+            padding: 12px 15px;
+            font-weight: 600;
+            background-color: #eef2ff;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .dark-mode .user-header {
+            background-color: #1e40af;
+            color: white;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin: 8px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .user-message {
+            background-color: var(--primary);
+            color: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .admin-reply {
+            background-color: #e2e8f0;
+            color: var(--text-light);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+            border-right: 3px solid var(--primary);
+        }
+
+        .dark-mode .admin-reply {
+            background-color: #475569;
+            color: var(--text-dark);
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 12px;
+            background: white;
+            border-top: 1px solid #ddd;
+            gap: 10px;
+        }
+
+        .dark-mode .chat-input {
+            background: #334155;
+            border-color: #475569;
+        }
+
+        textarea {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .dark-mode textarea {
+            background: #475569;
+            border-color: #64748b;
+            color: white;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            background-color: var(--primary);
+            color: white;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .typing-indicator {
+            font-style: italic;
+            color: #666;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+
+        .dark-mode .typing-indicator {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Message Dashboard</h2>
+        <button class="toggle-dark" onclick="document.body.classList.toggle('dark-mode')">
+            🌓
+        </button>
+    </div>
+
+    <div class="chat-container" id="chat-container">
+        {% for user, messages in grouped_messages.items() %}
+            <div class="message-group" id="user-{{ user }}">
+                <div class="user-header">
+                    <span>{{ user }}</span>
+                    <span>Active now</span>
+                </div>
+                {% for message in messages %}
+                    <div class="message user-message">
+                        {{ message.content }}
+                        <div class="timestamp">{{ message.timestamp|default('10:30 AM') }}</div>
+                    </div>
+                    {% for reply in message.replies %}
+                        <div class="message admin-reply">
+                            {{ reply.content }}
+                            <div class="timestamp">{{ reply.timestamp|default('10:32 AM') }}</div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="chat-input">
+        <textarea id="message-input" placeholder="Type your reply..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const socket = io();
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+
+        // Auto-scroll to bottom
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Send message (admin reply)
+        function sendMessage() {
+            const content = messageInput.value.trim();
+            if (content) {
+                // In a real app, you'd specify which user to reply to
+                socket.emit('admin_reply', { 
+                    mobile: 'TARGET_USER_PHONE', 
+                    content: content 
+                });
+                messageInput.value = '';
+            }
+        }
+
+        // Socket listeners
+        socket.on('receive_user_message', (data) => {
+            let userDiv = document.getElementById(`user-${data.mobile}`);
+            
+            if (!userDiv) {
+                userDiv = document.createElement('div');
+                userDiv.className = 'message-group';
+                userDiv.id = `user-${data.mobile}`;
+                userDiv.innerHTML = `
+                    <div class="user-header">
+                        <span>${data.mobile}</span>
+                        <span>Active now</span>
+                    </div>
+                `;
+                chatContainer.appendChild(userDiv);
+            }
+
+            const newMessage = document.createElement('div');
+            newMessage.className = 'message user-message';
+            newMessage.innerHTML = `
+                ${data.content}
+                <div class="timestamp">Just now</div>
+            `;
+            userDiv.appendChild(newMessage);
+            scrollToBottom();
+        });
+
+        socket.on('receive_admin_reply', (data) => {
+            const userDiv = document.getElementById(`user-${data.mobile}`);
+            if (userDiv) {
+                const newReply = document.createElement('div');
+                newReply.className = 'message admin-reply';
+                newReply.innerHTML = `
+                    ${data.content}
+                    <div class="timestamp">Just now</div>
+                `;
+                userDiv.appendChild(newReply);
+                scrollToBottom();
+            }
+        });
+
+        // Send message on Enter (Shift+Enter for new line)
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        window.onload = scrollToBottom;
+    </script>
+</body>
+</html>

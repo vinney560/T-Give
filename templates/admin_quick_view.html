@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Quick View</title>
+  <style>
+    /* Maintain original design */
+    body { 
+      background: #0A0A0A; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      text-align: center; 
+    }
+    h1, h2 { color: cyan; margin-bottom: 10px; }
+    .section { 
+      margin: 20px auto; 
+      width: 90%; 
+      padding: 10px; 
+      border-radius: 8px; 
+      background: #121212; 
+      box-shadow: 0px 0px 10px rgba(0, 255, 255, 0.5);
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border: 1px solid #555; text-align: center; }
+    th { background: #222; color: cyan; font-weight: bold; }
+    tr:nth-child(even) { background: #181818; }
+    tr:hover { background: rgba(0, 255, 255, 0.1); }
+    button { 
+      margin-top: 20px; position: fixed; top: 20px; left: 10px;
+      padding: 10px 20px; font-size: 16px; border: none; 
+      background: cyan; color: black; cursor: pointer; 
+      border-radius: 5px; transition: 0.3s;
+    }
+    button:hover { background: white; color: black; }
+    .update-indicator {
+      position: fixed; top: 70px; right: 20px; padding: 8px 15px;
+      background: #00cccc; color: black; border-radius: 15px;
+      font-size: 0.9rem; display: none;
+    }
+    .updated-row { animation: highlight 2s ease-out; }
+    @keyframes highlight {
+      from { background: rgba(0, 255, 255, 0.3); }
+      to { background: transparent; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Quick View</h1>
+  <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+  <div id="updateStatus" class="update-indicator">🔄 Live Updating...</div>
+
+  <!-- Orders Section -->
+  <div class="section">
+    <h2>Orders</h2>
+    <table id="orders-table">
+      <thead>
+        <tr><th>ID</th><th>User</th><th>Product</th><th>Quantity</th><th>Status</th><th>Timestamp</th><th>Location</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Users Section -->
+  <div class="section">
+    <h2>Users</h2>
+    <table id="users-table">
+      <thead>
+        <tr><th>ID</th><th>Mobile</th><th>Agreed</th><th>Role</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Admins Section -->
+  <div class="section">
+    <h2>Admins</h2>
+    <table id="admins-table">
+      <thead>
+        <tr><th>ID</th><th>Mobile</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Products Section -->
+  <div class="section">
+    <h2>Products</h2>
+    <table id="products-table">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API_ENDPOINTS = {
+      orders: '/api/admin/orders',
+      users: '/api/admin/users',
+      admins: '/api/admin/admins',
+      products: '/api/admin/products'
+    };
+
+    const TABLE_CONFIG = {
+      'orders-table': ['id', 'user_mobile', 'product_name', 'quantity', 'status', 'created_at', 'location'],
+      'users-table': ['id', 'mobile', 'agreed', 'role', 'active'],
+      'admins-table': ['id', 'mobile'],
+      'products-table': ['id', 'name', 'price', 'stock']
+    };
+
+    class LiveUpdater {
+      constructor() {
+        this.isUpdating = false;
+        this.updateIndicator = document.getElementById('updateStatus');
+        this.initialLoad = true;
+      }
+
+      async fetchData(endpoint) {
+        try {
+          const response = await fetch(endpoint);
+          return await response.json();
+        } catch (error) {
+          console.error(`Error fetching ${endpoint}:`, error);
+          return [];
+        }
+      }
+
+      updateTable(tableId, data) {
+        const tbody = document.querySelector(`#${tableId} tbody`);
+        const newContent = data.map(item => `
+          <tr class="${this.initialLoad ? '' : 'updated-row'}">
+            ${TABLE_CONFIG[tableId].map(field => `<td>${item[field]}</td>`).join('')}
+          </tr>
+        `).join('');
+
+        if (tbody.innerHTML !== newContent) {
+          tbody.innerHTML = newContent;
+        }
+      }
+
+      async updateAllTables() {
+        if (this.isUpdating) return;
+        this.isUpdating = true;
+        this.updateIndicator.style.display = 'block';
+
+        try {
+          const [orders, users, admins, products] = await Promise.all([
+            this.fetchData(API_ENDPOINTS.orders),
+            this.fetchData(API_ENDPOINTS.users),
+            this.fetchData(API_ENDPOINTS.admins),
+            this.fetchData(API_ENDPOINTS.products)
+          ]);
+
+          this.updateTable('orders-table', orders);
+          this.updateTable('users-table', users);
+          this.updateTable('admins-table', admins);
+          this.updateTable('products-table', products);
+
+        } finally {
+          this.isUpdating = false;
+          this.updateIndicator.style.display = 'none';
+          if (this.initialLoad) this.initialLoad = false;
+        }
+      }
+
+      start() {
+        this.updateAllTables();
+        setInterval(() => this.updateAllTables(), 5000);
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      const updater = new LiveUpdater();
+      updater.start();
+    });
+  </script>
+</body>
+</html>

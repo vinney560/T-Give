@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ product.name }} - Product Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+    .product-details {
+      max-width: 87%;
+      margin: 20px auto;
+      background-color: #fff;
+      text-align: center;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .product-details h2 {
+      font-size: 2rem;
+      color: #333;
+    }
+    .product-image {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      max-width: 450px;
+      margin: 20px 0;
+      border: solid 2px cyan;
+    }
+    .product-description {
+      color: #666;
+      margin: 20px 0;
+      text-align: left;
+      padding-left: 20px;
+    }
+    .price {
+      font-size: 1.5rem;
+      color: #27ae60;
+      margin: 20px 0;
+    }
+    .rating-container {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .star {
+      font-size: 2rem;
+      color: #ccc;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+    .star.selected {
+      color: #f39c12;
+    }
+    .submit-rating-btn {
+      background-color: #27ae60;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 45%;
+    }
+    .submit-rating-btn:hover {
+      background-color: #2ecc71;
+    }
+    .glow-button {
+      background: #00ffc3;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ffc3, 0 0 20px #00ffc3;
+      transition: all 0.3s ease-in-out;
+    }
+    .glow-button:disabled {
+      background: #cccccc !important;
+      color: #666 !important;
+      box-shadow: none !important;
+      cursor: not-allowed !important;
+      opacity: 0.7;
+    }
+    .glow-button:hover:not(:disabled) {
+      box-shadow: 0 0 16px #00ffc3, 0 0 30px #00ffc3;
+      background: #00e6b0;
+    }
+    .view-cart { 
+      position: fixed; 
+      bottom: 40px; 
+      right: 20px; 
+      padding: 14px;
+      background: darkred; 
+      color: black; 
+      border: solid cyan 2px; 
+      border-radius: 50%; 
+      cursor: pointer; 
+      font-size: 18px;
+      font-weight: bold; 
+      z-index: 1000;
+    }
+    .view-cart:hover { 
+      background: darkred; 
+    }
+    .back-btn { 
+      position: absolute; 
+      top: 20px; 
+      left: 10px;
+      background: transparent; 
+      color: red; 
+      border: none; 
+      cursor: pointer; 
+      font-size: 30px;
+      z-index: 1551;
+    }
+    .back-btn:hover { 
+      background: #00cccc;
+    }
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+    }
+    .toast {
+      min-width: 150px;
+      max-width: 90%;
+      padding: 12px 25px;
+      border-radius: 8px;
+      color: white;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.exit {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    .toast.success {
+      background: #2ecc71;
+      border-left: 5px solid #27ae60;
+    }
+    .toast.error {
+      background: #e74c3c;
+      border-left: 5px solid #c0392b;
+    }
+    .toast.success::before {
+      content: '✓';
+      font-size: 1.2em;
+    }
+    .toast.error::before {
+      content: '✕';
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="product-details">
+  <button class="back-btn" onclick="closePage()">✖</button>
+  <marquee behavior="scroll" direction="left"><span style="color:#FCB245"><b>WE ARE T-GIVE ‼️️ WELCOME ALL</b></span></marquee>
+  
+  <h2>{{ product.name }}</h2>
+  <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy" class="product-image">
+
+  <ul class="product-description">
+    {% for line in product.description.split('\n') %}
+      <li>{{ line }}</li>
+    {% endfor %}
+  </ul>
+
+  <p class="price">Price: Ksh {{ product.price }}</p>
+
+  <label for="quantity" style="font-size: 1.1rem; margin-right: 10px;">Quantity:</label>
+  <input type="number" id="quantity" name="quantity" min="1" value="1"
+         style="padding: 8px; width: 80px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; text-align: center;" required>
+  <button onclick="addToCart({{ product.id }}, this)" class="glow-button">Add to Cart</button>
+
+  <div class="rating-container">
+    <span class="star" data-value="1">&#9733;</span>
+    <span class="star" data-value="2">&#9733;</span>
+    <span class="star" data-value="3">&#9733;</span>
+    <span class="star" data-value="4">&#9733;</span>
+    <span class="star" data-value="5">&#9733;</span>
+  </div>
+  <p>Your Rating: <span id="rating-result">Not Rated</span></p>
+
+  <form onsubmit="event.preventDefault(); submitRating({{ product.id }});">
+    <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="submit-rating-btn">Submit Rating</button>
+  </form>
+
+  <p id="average-rating">Average Rating: {{ average_rating }}</p>
+  
+  <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">🛒</button>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+  let selectedRating = 0;
+  const stars = document.querySelectorAll('.star');
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      selectedRating = parseInt(star.getAttribute('data-value'));
+      stars.forEach(s => s.classList.toggle('selected', parseInt(s.getAttribute('data-value')) <= selectedRating));
+      document.getElementById('rating-result').innerText = `${selectedRating}`;
+    });
+  });
+
+  function showToast(message, success = true) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    const typeClass = success ? 'success' : 'error';
+    toast.className = `toast ${typeClass}`;
+    toast.textContent = message;
+    container.prepend(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+      toast.classList.add('exit');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  function submitRating(productId) {
+    if (selectedRating === 0) {
+      showToast("Please select a rating.", false);
+      return;
+    }
+    fetch(`/product/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.getElementById('csrf-token').value
+      },
+      body: JSON.stringify({ rating: selectedRating })
+    })
+    .then(res => res.json())
+    .then(data => {
+      showToast(data.message, data.success);
+      if (data.success) {
+        document.getElementById('average-rating').innerText = `Average Rating: ${data.average_rating}`;
+      }
+    })
+    .catch(() => showToast("An error occurred.", false));
+  }
+
+  function addToCart(productId, button) {
+    button.disabled = true;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    fetch('/add_to_cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.getElementById('csrf-token').value
+      },
+      body: JSON.stringify({ product_id: productId, quantity: quantity })
+    })
+    .then(res => res.json())
+    .then(data => showToast(data.message, data.success))
+    .catch(() => showToast("Failed to add to cart.", false))
+    .finally(() => {
+      setTimeout(() => {
+        button.disabled = false;
+      }, 3000);
+    });
+  }
+
+  function closePage() {
+    history.back();
+  }
+
+  // Handle flash messages from Flask
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      showToast("{{ message }}", "{{ category }}" === "success");
+    {% endfor %}
+  {% endwith %}
+</script>
+
+</body>
+</html>

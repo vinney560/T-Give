@@ -1,0 +1,26 @@
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+th, td {
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: rgba(0, 255, 255, 0.2);
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+tr:hover {
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.5);
+}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T-Give Nexus Welcome</title>
+    <style>
+        body {
+            background: #0a0c12;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        .welcome-message {
+            font-size: 2rem;
+            font-weight: bold;
+            opacity: 0;
+            position: absolute;
+            top: 40%;
+            animation: fadeInOut 4s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            30% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-message">Welcome to T-Give Nexus</div>
+
+    <script>
+        function speakMessage() {
+            const msg = new SpeechSynthesisUtterance("Welcome to T-Give Nexus");
+            msg.lang = "en-US";  
+            msg.rate = 1;        
+            msg.pitch = 1.2;     
+            window.speechSynthesis.speak(msg);
+        }
+
+        function redirectUser() {
+            // Automatically check if the user is an admin
+            const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+            // Redirect accordingly
+            window.location.href = isAdmin ? "/admin_dashboard" : "/products";
+        }
+
+        window.onload = function () {
+            speakMessage();
+
+            // Ensure automatic redirection after the animation finishes
+            setTimeout(redirectUser, 4500);
+        };
+    </script>
+
+</body>
+</html>

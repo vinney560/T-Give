@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0a0f16;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #1c1f26;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.3);
+            text-align: center;
+            width: 350px;
+        }
+        .input-group, .password-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid #666;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+            background: #333;
+        }
+        .input-group span {
+            background-color: #28a745;
+            padding: 10px;
+            font-weight: bold;
+            color: white;
+        }
+        .input-group input, .password-group input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            background: #222;
+            color: white;
+        }
+        .password-group {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            color: lightgray;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .spinner { margin-left: 10px; animation: spin 1s linear infinite; font-size: 16px;b}
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .flash-container {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            padding: 0;
+            border-radius: 10px;
+            text-align: center;
+            background: red;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.5s ease-in-out;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+           from { transform: translateX(100%); }
+           to { transform: translateX(-50%); }
+        }
+        .flash-message {
+            color: white;
+        }
+        a {
+            color: yellow;
+            text-decoration: none;
+        }
+        label {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="flash-message">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        <h2>Register</h2>
+        <form action="/register" method="POST">
+            <div class="input-group">
+                <span>+254</span>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="tel" name="mobile" placeholder="7xxxxxxxx or 1xxxxxxxx" required pattern="[71][0-9]{8}" value="{{ mobile }}">
+            </div>
+
+            <div class="password-group">
+                <input type="password" name="password" id="password" placeholder="Password" required minlength="4" value="{{ password }}">
+                <span class="toggle-password" onclick="togglePassword()">👁</span>
+            </div>
+
+            <div class="password-group">
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" required minlength="4" value="{{ confirm_password }}">
+                <span class="toggle-password" onclick="toggleConfirmPassword()">👁</span>
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="location" placeholder="Enter the name of the nearest town" required value="{{ location }}">
+            </div><div class="input-group">
+                <input type="text" name="email" placeholder=" Enter Email address" required value="{{ email }}">
+            </div>
+
+            <label>
+                <input type="checkbox" id="admin-toggle" onclick="toggleAdminSecret()"> Optional
+            </label>
+
+            <div class="password-group" id="admin-secret-container" style="display: none;">
+                <input type="password" id="admin_secret" name="admin_secret" placeholder="Secret Code">
+            </div>
+
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Register</span>
+                <span class="spinner" id="spinner" style="display: none;">⏳</span>
+            </button>
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            var pass = document.getElementById("password");
+            pass.type = pass.type === "password" ? "text" : "password";
+        }
+        function toggleConfirmPassword() {
+            var pass = document.getElementById("confirm_password");
+            pass.type = pass.type === "password" ? "text" : "password";
+        }
+        function toggleAdminSecret() {
+            var container = document.getElementById("admin-secret-container");
+            container.style.display = document.getElementById("admin-toggle").checked ? "flex" : "none";
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            let flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    setTimeout(() => { msg.remove(); }, 500);
+                }, 3000);
+            });
+        });
+        const form = document.querySelector("form");
+        const btnText = document.getElementById("btnText");
+        const spinner = document.getElementById("spinner");
+        const submitBtn = document.getElementById("submitBtn");
+
+        form.addEventListener("submit", function () {
+            btnText.textContent = "Processing...";
+            spinner.style.display = "inline-block";
+            submitBtn.disabled = true;
+       });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Orders - Admin</title>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #555;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background: #333;
+      color: cyan;
+    }
+    td {
+      background: #222;
+    }
+    select, button {
+      padding: 5px 10px;
+      margin: 5px;
+      border-radius: 5px;
+    }
+    button {
+      background: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #218838;
+    }
+    .btn {
+      margin-top: 20px;
+      position: fixed;
+      top: 20px;
+      left: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: cyan;
+      color: black;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: white;
+      color: black;
+    }
+    #pagination-controls button {
+      background: #555;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #pagination-controls button:hover {
+      background: cyan;
+      color: black;
+    }
+    #pagination-controls span {
+      margin: 0 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Manage Orders</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>User</th>
+        <th>Product</th>
+        <th>Quantity</th>
+        <th>Status</th>
+        <th>Action</th>
+        <th>Timestamp</th>
+        <th>Location</th>
+      </tr>
+    </thead>
+    <tbody id="orders-table-body">
+      <!-- Orders inserted via JS -->
+    </tbody>
+  </table>
+
+  <div id="pagination-controls"></div>
+
+  <!-- CSRF Token Hidden Field -->
+  <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
+
+  <script>
+    let currentPage = 1;
+
+    function loadOrders(page = 1) {
+      fetch(`/admin/orders_data?page=${page}&per_page=25`)
+        .then(response => response.json())
+        .then(data => {
+          const tableBody = document.getElementById('orders-table-body');
+          tableBody.innerHTML = '';
+
+          data.orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${order.id}</td>
+              <td>${order.user}</td>
+              <td>${order.product}</td>
+              <td>${order.quantity}</td>
+              <td>
+                <select id="status-${order.id}">
+                  <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                  <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                </select>
+              </td>
+              <td>
+                <button onclick="updateOrder(${order.id})">Update</button>
+                <button onclick="deleteOrder(${order.id})" style="background: red;">Delete</button>
+              </td>
+              <td>${order.created_at}</td>
+              <td>${order.location}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+
+          const paginationControls = document.getElementById('pagination-controls');
+          paginationControls.innerHTML = `
+            ${data.has_prev ? `<button onclick="loadOrders(${data.prev_page})">Previous</button>` : ''}
+            <span>Page ${data.current_page}</span>
+            ${data.has_next ? `<button onclick="loadOrders(${data.next_page})">Next</button>` : ''}
+          `;
+
+          currentPage = data.current_page;
+        });
+    }
+
+    function updateOrder(orderId) {
+      let newStatus = document.getElementById(`status-${orderId}`).value;
+      fetch('/admin/update_order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': document.getElementById('csrf-token').value
+        },
+        body: JSON.stringify({ order_id: orderId, status: newStatus })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.success ? "Order updated successfully!" : "Failed to update order.");
+      });
+    }
+
+    function deleteOrder(orderId) {
+      if (confirm("Are you sure you want to delete this order?")) {
+        fetch(`/admin/delete_order/${orderId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.getElementById('csrf-token').value
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          alert(data.success ? "Order deleted successfully!" : "Failed to delete order.");
+          loadOrders(currentPage);
+        });
+      }
+    }
+
+    // Auto-load and auto-refresh
+    window.onload = () => {
+      loadOrders(currentPage);
+      setInterval(() => loadOrders(currentPage), 5000);  // auto-refresh every 5s
+    };
+  </script>
+
+</body>
+</html>

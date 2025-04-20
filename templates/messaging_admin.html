@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Chat - Users</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .user-list {
+      max-width: 900px;
+      margin: 60px auto;
+    }
+
+    .user-card {
+      background: rgba(17, 24, 39, 0.9);
+      border: 2px solid #58a6ff;
+      border-radius: 16px;
+      padding: 15px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+      box-shadow: 0 0 15px #00ffc3;
+    }
+
+    .user-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 25px #00ffc3;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-card img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 2px solid #00ffc3;
+      margin-right: 18px;
+    }
+
+    .badge {
+      background: #ff3b30;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      box-shadow: 0 0 8px #ff3b30;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #00ffc3;
+      text-shadow: 0 0 10px #00ffc3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="user-list px-4">
+    <h2>Select a User to Chat With</h2>
+
+    {% for user in users %}
+    <div class="user-card" onclick="selectUser({{ user.id }}, '{{ user.mobile }}')">
+      <div class="user-info">
+        <img src="{{ user.profile_image }}" alt="Profile">
+        <div>
+          <p class="text-lg font-bold text-white">{{ user.mobile }}</p>
+          <p class="text-sm text-gray-400">{{ user.role }}</p>
+        </div>
+      </div>
+      {% if unread_counts[user.id] > 0 %}
+      <div class="badge">{{ unread_counts[user.id] }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    function selectUser(userId, mobile) {
+      window.location.href = '/messages/' + userId;
+      fetch('/admin/mark_read/' + userId);
+    }
+  </script>
+
+</body>
+</html>

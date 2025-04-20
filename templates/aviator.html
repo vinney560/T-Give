@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator Game</title>
+</head>
+<body>
+    <h1>Aviator Game</h1>
+    <p>Multiplier: <span id="multiplier">1.00x</span></p>
+    <input type="text" id="username" placeholder="Enter username">
+    <input type="number" id="bet_amount" placeholder="Enter bet amount">
+    <button onclick="placeBet()">Place Bet</button>
+    <button onclick="cashOut()">Cash Out</button>
+    
+    <script>
+        function updateMultiplier() {
+            fetch("/game_status")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("multiplier").innerText = data.multiplier + "x";
+                });
+        }
+        setInterval(updateMultiplier, 500);
+
+        function placeBet() {
+            const username = document.getElementById("username").value;
+            const betAmount = document.getElementById("bet_amount").value;
+
+            fetch("/place_bet", {
+                method: "POST",
+                body: JSON.stringify({ username, bet_amount: betAmount }),
+                headers: { "Content-Type": "application/json" }
+            }).then(response => response.json()).then(data => alert(data.status));
+        }
+
+        function cashOut() {
+            const username = document.getElementById("username").value;
+            
+            fetch("/cashout", {
+                method: "POST",
+                body: JSON.stringify({ username }),
+                headers: { "Content-Type": "application/json" }
+            }).then(response => response.json()).then(data => alert(data.status + (data.winnings ? " Winnings: " + data.winnings : "")));
+        }
+    </script>
+</body>
+</html>

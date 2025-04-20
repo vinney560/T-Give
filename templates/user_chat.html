@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Message Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            font-family: 'Orbitron', sans-serif;
+            color: #eee;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            height: 90vh;
+            background: #1e1e2f;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 25px #00ffe7;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #121212;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00ffe7;
+            box-shadow: 0 2px 5px rgba(0,255,231,0.2);
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+            font-size: 0.95em;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .message.user {
+            background-color: #00ffe740;
+            align-self: flex-end;
+            color: #fff;
+        }
+        .message.admin {
+            background-color: #222;
+            align-self: flex-start;
+            color: #00ffe7;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #121212;
+            gap: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 30px;
+            border: none;
+            outline: none;
+            background-color: #2a2a40;
+            color: white;
+            font-size: 1em;
+        }
+        .chat-input button {
+            background-color: #00ffe7;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #111;
+            transition: 0.2s ease;
+        }
+        .chat-input button:hover {
+            background-color: #00ccbb;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #00ffe7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">Live Chat with Admin</div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div><script>
+    const socket = io();
+    const chatMessages = document.getElementById('chat-messages');
+    const input = document.getElementById('message-input');
+
+    function appendMessage(text, isUser = true) {
+        const msg = document.createElement('div');
+        msg.className = 'message ' + (isUser ? 'user' : 'admin');
+        msg.innerText = text;
+        chatMessages.appendChild(msg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        appendMessage(text, true);
+        socket.emit('send_message', { message: text });
+        input.value = '';
+    }
+
+    socket.on('receive_message', data => {
+        appendMessage(data.message, false);
+    });
+</script></body>
+</html>

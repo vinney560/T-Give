@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Chat - Select User</title>
+  <style>
+    body { background: #0f0f0f; color: #00ffff; font-family: 'Segoe UI', sans-serif; text-align: center; }
+    .user-card {
+      display: flex;
+      align-items: center;
+      background-color: #333;
+      border-radius: 10px;
+      margin: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s;
+      cursor: pointer;
+      justify-content: space-between;
+    }
+    .user-card:hover { background-color: #444; }
+    .user-card img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+    .user-card .user-info {
+      flex-grow: 1;
+      text-align: left;
+    }
+    .user-card .user-info p { margin: 0; font-size: 1.1rem; }
+    .user-card .user-info p.mobile { font-size: 1rem; color: #00ffff; }
+    .user-card .status { font-size: 0.9rem; color: #00ff00; }
+  </style>
+</head>
+<body>
+  <h2>Select a User to Reply</h2>
+  <div id="user-list">
+    {% for user in users %}
+      <div class="user-card" onclick="window.location.href='{{ url_for('admin_chat_room', user_id=user.id) }}'">
+        <img src="{{ user.profile_image or '/static/default-profile.png' }}" alt="User Picture">
+        <div class="user-info">
+          <p>{{ user.mobile }}</p>
+          <p class="mobile">{{ user.role }}</p>
+        </div>
+        <div class="status">Active</div>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSRF Error</title>
+    <style>
+        body {
+            background-color: #1c1c1c;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .error-container {
+            background: linear-gradient(45deg, #ff5c8e, #6a3dc1);
+            border-radius: 10px;
+            padding: 40px 60px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            transform: scale(1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .error-container:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            padding: 0;
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #ddd;
+            margin: 20px 0;
+        }
+
+        .btn {
+            background-color: #6a3dc1;
+            color: #fff;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #ff5c8e;
+        }
+
+        .error-code {
+            font-size: 6rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-code">⚠️ 403</div>
+        <h1>CSRF Protection Error</h1>
+        <p>It seems like we couldn't verify the request. This could be due to an expired or missing token. Please try again or contact support if the issue persists.</p>
+        <p>{{ reason }}</p>
+        <a href="{{ url_for('home') }}" class="btn">Go to Homepage</a>
+    </div>
+</body>
+</html>

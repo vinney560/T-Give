@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non_users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0a0f16;
+            color: white;
+        }
+        .container {
+            background: #1c1f26;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 0, 0.3);
+            text-align: center;
+            justify-content: left;
+            width: 350px;
+        button {
+            width: 20%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        a {
+            color: yellow;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Dear Guest, to access this page you need to login.</h1>
+  <li>User privileges is available for <span style="color:red"><i>REGISTERED</i></span> Users <span style="color: yellow"><b>ONLY</b></span></li>
+  <p>To login click <a href="/login">here</a></p>
+  <button onclick="window.location.href='/home'">home</button>
+</div>   
+</body>

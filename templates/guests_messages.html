@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Messages</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #003333, #00cccc, #003333);
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: #0078ff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .admin-reply {
+            background-color: #e0e0e0;
+            color: black;
+            align-self: flex-start;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            align-items: center;
+        }
+
+        input[type="text"], textarea {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        input[type="text"] {
+            max-width: 120px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #0078ff;
+            color: white;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+        }
+    </style>
+</head>
+<body>
+     <div class="hero">
+        <h2>Welcome to Annah's Business Store</h2>
+        <p>Your one-stop shop for the best products.</p>
+        <p><span style="color: green;">Talk with our customer care, Allan</span></p>
+    </div>
+    <div class="chat-container" id="chat-container">
+        {% for message in messages %}
+            <div class="message user-message">
+                <strong>{{ message.nickname }}:</strong> {{ message.content }}
+            </div>
+            {% for reply in message.replies %}
+                <div class="message admin-reply">
+                    <strong>Allan:</strong> {{ reply.content }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="chat-input">
+        <input type="text" id="nicknameInput" placeholder="Your Nickname">
+        <textarea id="messageInput" placeholder="Type a message..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let nickname = document.getElementById('nicknameInput').value.trim();
+            let messageContent = document.getElementById('messageInput').value.trim();
+
+            if (nickname === "" || messageContent === "") {
+                alert("Please enter a nickname and a message.");
+                return;
+            }
+
+            fetch('/send_user_message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname: nickname, content: messageContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let chatContainer = document.getElementById('chat-container');
+                    let newMessage = document.createElement('div');
+                    newMessage.classList.add('message', 'user-message');
+                    newMessage.innerHTML = `<strong>${nickname}:</strong> ${messageContent}`;
+                    chatContainer.appendChild(newMessage);
+
+                    // Clear input field and scroll to the new message
+                    document.getElementById('messageInput').value = "";
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                } else {
+                    alert("Error sending message.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

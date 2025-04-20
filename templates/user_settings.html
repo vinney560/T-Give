@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Settings</title>
+  <style>
+    body { background: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
+    .container {
+      width: 80%;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 10px;
+      box-shadow: 0 0 10px cyan;
+    }
+    label { display: block;
+      margin: 10px 0 5px;
+    }
+    input, textarea { width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #333;
+      color: white;
+    }
+    button { width: 98%;
+      padding: 10px;
+      margin-top: 20px;
+      background: cyan;
+      border: none;
+      color: black;
+      border-radius: 5px;
+      cursor: pointer;
+   }
+   .container { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); padding: 0; text-align: center;  justify-content: center; border-radius: 5px; background: red; font-weight: bold; width: 35%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); opacity: 1; transition: opacity 0.5s ease-in-out; animation: slideIn 0.3s ease-out; }
+   @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(-50%); } }
+    .flash-message { color: white; }
+  </style>
+</head>
+<body>
+  <h1>User Settings</h1>
+  <div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+          {% for category, message in messages %}
+              <p class="flash-message">{{ message }}</p>
+          {% endfor %}
+      {% endif %}
+  {% endwith %}
+  </div>
+  <div class="container">
+    <form action="{{ url_for('update_user') }}" method="POST">
+      <label>Mobile Number (712345678):</label>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="text" name="mobile" placeholder="Enter new number" required>
+      
+      <label>Current Password:</label>
+      <input type="password" name="current_password" placeholder="Enter current password" required>
+      
+      <label>New Password:</label>
+      <input type="password" name="new_password" placeholder="Enter new password" required>
+      
+      <label>Confirm New Password:</label>
+      <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+      
+      <button type="submit">Update Settings</button>
+    </form>
+  </div>
+</div><div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+<script>    
+    function togglePassword() {
+        var pass = document.getElementById("password");
+        pass.type = (pass.type === "password") ? "text" : "password";
+    }
+
+    // Fade out flash messages after 3 seconds
+    document.addEventListener("DOMContentLoaded", function() {
+        let flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(msg => {
+            setTimeout(() => {
+                msg.style.opacity = '0';
+                setTimeout(() => {
+                    msg.remove();
+                }, 500);
+            }, 3000);
+        });
+    });      
+</script></body>
+</html>

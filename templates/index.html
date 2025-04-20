@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to T-Give</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0e0e0e;
+            color: white;
+            overflow: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to right, #00cccc, #003333);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 255, 255, 0.5);
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 85% 100%, 15% 100%, 0 100%);
+        }
+
+        .header:hover { background: #00cccc; }
+        .header h1 { margin: 0; font-size: 24px; flex-grow: 1; text-align: center; }
+
+         .auth-buttons {
+             display: flex;
+             gap: 7px;
+             position: absolute;
+             right: 34px; 
+             top: 91%;  
+             transform: translateY(-70%);
+        }
+
+        .auth-buttons a {
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .login-btn { background: cyan; color: black; }
+        .register-btn { background: lime; color: black; }
+
+        .login-btn:hover { background: #00bbbb; }
+        .register-btn:hover { background: #28a745; }
+
+        .sidebar {
+            position: fixed;
+            left: -400px;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background: #1a1a1a;
+            padding-top: 50px;
+            transition: 0.3s;
+            box-shadow: 3px 0 10px rgba(0, 255, 255, 0.1);
+            z-index: 1200;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .sidebar a:hover {
+            background: #00ffff;
+            color: #000;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 25px;
+            cursor: pointer;
+            color: white;
+        }
+        .menu-btn {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: none;
+            border: none;
+            z-index: 1300;
+        }
+
+        .content-wrapper {
+            position: absolute;
+            top: 100px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px,4fr));
+            gap: 8px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .product {
+            background: rgba(255, 255, 255, 0.0);
+            border-radius: 10px;
+            padding: 11px;
+            width: 100px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .product:hover {
+            background: rgba(255, 255, 255, 0.0);
+        }
+
+        img {
+            width: 125%;
+            height: 55%;
+            border-radius: 4px;
+        }
+
+        .products {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: left;
+            gap: 8px;
+        }
+        .container {
+            position: absolute;
+            top: 10px;
+            z-index:10000;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0;
+            width: 26%;
+            text-align: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: green;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+           from { transform: translateX(100%); }
+           to { transform: translateX(-50%); }
+        }
+        .flash-message { color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash-message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    </div>
+    <!-- Fixed Header -->
+    <div class="header">
+        <button class="menu-btn" onclick="openMenu()">≡</button>
+        <h1>Welcome to T-Give</h1>
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn">Login</a>
+            <a href="/register" class="register-btn">Register</a>
+        </div>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <span class="close-btn" onclick="closeMenu()">✖</span>
+        <a href="/home">Home</a>
+        <a href="/about">About Us</a>
+        <a href="/user_messages">Message Us</a>
+        <a href="/services">Services Offered</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+        <a href="/HELP">HELP</a>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="content-wrapper">
+        <div class="products-container">
+            <div class="products">
+                {% for product in products %}
+                <div class="product">
+                    <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy">
+                    <h4>{{ product.name }}</h4>
+                    <p>Price: Ksh {{ product.price }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openMenu() {
+            document.getElementById("sidebar").style.left = "0";
+        }
+        // Fade out flash messages after 3 seconds
+         document.addEventListener("DOMContentLoaded", function() {
+            let flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    setTimeout(() => {
+                        msg.remove();
+                    }, 500);
+                }, 3000);
+            });
+        });
+        function closeMenu() {
+            document.getElementById("sidebar").style.left = "-250px";
+        }
+    </script>
+
+</body>
+</html>

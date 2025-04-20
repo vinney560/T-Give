@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Messages</title>
+</head>
+<body>
+    <h2>Your Messages</h2>
+
+    <h3>Send a Message</h3>
+    <form methods="POST">
+        <label>To (Admin ID):</label>
+        <input type="number" name="receiver_id" required>
+        <label>Message:</label>
+        <textarea name="content" required></textarea>
+        <button type="submit">Send</button>
+    </form>
+
+    <h3>Inbox</h3>
+    <ul>
+        {% for message in received_messages %}
+            <li>{{ message.sender.mobile }}: {{ message.content }} - {{ message.id.timestamp }}</li>
+            <a href="{{ url_for('delete_message', message_id=message.id) }}">Delete</a>
+        {% endfor %}
+    </ul>
+
+    <h3>Sent Messages</h3>
+    <ul>
+        {% for message in sent_messages %}
+            <li>To {{ message.receiver.mobile }}: {{ massage.content }} - {{ massage.timestamp }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

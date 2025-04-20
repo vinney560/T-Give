@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Search Results</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      padding: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .title {
+      font-size: 2.0rem;
+      margin-bottom: 20px;
+      border-left: 5px solid #00ffcc;
+      padding-left: 15px;
+    }
+
+    .not-found {
+      text-align: center;
+      color: #888;
+      margin-top: 50px;
+      font-size: 2.0rem;
+    }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px,2fr)); gap: 10px; text-align: center; padding: 5px; }
+    .product-card { flex: 0 0 auto; width: 425px; background: #1c1c1c; border: 1px solid #333; border-radius: 12px; padding: 12px; scroll-snap-align: start;   box-shadow: 0 0 10px rgba(0,255,255,0.1); transition: transform 0.3s ease; position: relative; }
+    .product-card:hover { transform: scale(1.03); }
+    .product-card img { width: 100%; height: 70%; object-fit: cover; border-radius: 8px; }
+    .product-name { margin: 10px 0 5px; font-size: 1.4rem; font-weight: 600; }
+    .product-price { color: #0ff; font-weight: 450; }
+    .section { margin-bottom: 40px; font-size: 2.0rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">Search Results for "{{ query }}"</span></div>
+    
+    {% if products %}
+      <div class="section"><div class="products-grid">
+        {% for product in products %}
+          <div class="product-card">
+            <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy"></a>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">Ksh {{ product.price }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="not-found">No products matched your search.</div></div>
+    {% endif %}
+  </div>
+</body>
+</html>
