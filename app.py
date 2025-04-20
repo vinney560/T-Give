@@ -23,6 +23,7 @@ import re
 from flask_wtf.csrf import CSRFProtect, CSRFError
 import cloudinary
 import cloudinary.uploader
+import cloudinary.utils
 from dotenv import load_dotenv
 load_dotenv()
 # ===================================================
@@ -705,35 +706,55 @@ def user_dashboard():
 def profile():  
     return render_template("profile.html", user=current_user)  
 
+# Allowed file extensions for profile picture
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+# Set the maximum content length for uploaded files (16MB)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+
+# Allowed file extensions in the upload folder
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.jpeg', '.gif']
+
+# Set the upload folder path
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Create the upload folder if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Function to check allowed file types
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Update profile picture route
 @app.route("/update_profile_pic", methods=["POST"])
 @login_required
 def update_profile_pic():
     if 'profile_pic' not in request.files:
         flash("No file uploaded!", "error")
-        return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))
+        return redirect(url_for("profile"))
 
-    file = request.files['profile_pic']
+    file = request.files['profile_pic']  
     
-    if file.filename == '':
-        flash("No selected file!", "error")
-        return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))
+    if file.filename == '':  
+        flash("No selected file!", "error")  
+        return redirect(url_for("account" if current_user.role == 'admin' else "profile"))
 
-    if file and allowed_file(file.filename):
-        try:
-            # Upload directly to Cloudinary
-            result = cloudinary.uploader.upload(file, folder="profile_pics")
+    if file and allowed_file(file.filename):  
+        filename = secure_filename(file.filename)  
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)  
+        file.save(file_path)  
 
-            # Save Cloudinary image URL
-            current_user.profile_image = result['secure_url']
-            db.session.commit()
+        # Update user profile image
+        current_user.profile_image = f"/uploads/{filename}"   
+        db.session.commit()  
 
-            flash("Profile picture updated successfully!", "success")
-        except Exception as e:
-            flash(f"Upload failed: {str(e)}", "error")
-    else:
-        flash(" ⚠️ Invalid file type! Only PNG, JPG, JPEG allowed.", "error")
+        flash("Profile picture updated!", "success")  
+    else:  
+        flash("⚠️ Invalid file type! Only PNG, JPG, JPEG allowed.", "error")
 
-    return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))
+    return redirect(url_for("account" if current_user.role == 'admin' else "profile"))
 
 # LOCATION UPDATE
 @app.route("/update_location", methods=["POST"])
@@ -1030,55 +1051,70 @@ def admin_about():
     about = About.query.first()
     secret_path = 'admin_secret.txt'
 
-    if request.method == 'POST':
-        if not about:
-            about = About()
+    if request.method == 'POST':  
+        if not about:  
+            about = About()  
 
-        # Update shop info
-        about.shop_name = request.form['shop_name']
-        about.date_created = datetime.strptime(request.form['date_created'], '%Y-%m-%d').date()
-        about.description = request.form['description']
-        about.owner = request.form['owner']
-        about.contact = request.form['contact']
+        # Update shop info  
+        about.shop_name = request.form.get('shop_name').strip()
+        about.date_created = datetime.strptime(request.form.get('date_created'), '%Y-%m-%d').date()
+        about.description = request.form.get('description').strip()
+        about.owner = request.form.get('owner').strip()
+        about.contact = request.form.get('contact').strip()
 
-        # Handle logo upload via Cloudinary
-        if 'logo' in request.files:
-            logo = request.files['logo']
-            if logo and logo.filename:
-                try:
-                    upload_result = cloudinary.uploader.upload(logo, folder="shop_logos")
-                    about.logo = upload_result['secure_url']
-                except Exception as e:
-                    flash(f"Logo upload failed: {str(e)}", "error")
+        # Validate required fields before committing to the DB
+        if not about.shop_name or not about.description or not about.owner:
+            flash("Please fill in all required fields!", "danger")
+            return redirect(url_for('admin_about'))
+
+        # Handle logo upload (optional)  
+        if 'logo' in request.files:  
+            logo = request.files['logo']  
+            if logo.filename:  
+                # Validate logo file extension
+                allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif']
+                filename = secure_filename(logo.filename)
+                ext = os.path.splitext(filename)[1].lower()
+                
+                if ext not in allowed_extensions:
+                    flash("Invalid logo file format!", "danger")
                     return redirect(url_for('admin_about'))
 
-        # Handle secret code change
-        current_code = request.form.get('current_code')
+                # Construct path and save the logo
+                logo_path = os.path.join('static', 'uploads', filename)
+                os.makedirs(os.path.dirname(logo_path), exist_ok=True)
+                logo.save(logo_path)  
+                about.logo = logo_path  
+
+        # Handle secret code change  
+        current_code = request.form.get('current_code')  
         new_code = request.form.get('new_code')
 
-        if current_code and new_code:
-            if os.path.exists(secret_path):
-                with open(secret_path, 'r') as f:
-                    saved_code = f.read().strip()
-                if current_code == saved_code:
-                    with open(secret_path, 'w') as f:
-                        f.write(new_code.strip())
-                    flash("Secret code updated successfully!", "success")
-                    log_admin_activity("[ADMIN] Updated Secret Code", 'system')
-                else:
-                    flash("Incorrect current secret code!", "danger")
-                    return redirect(url_for('admin_about'))
-            else:
-                with open(secret_path, 'w') as f:
-                    f.write(new_code.strip())
-                flash("Secret code file created and saved!", "success")
-                log_admin_activity("[ADMIN] Created initial Secret Code", 'system')
+        if current_code and new_code:  
+            if os.path.exists(secret_path):  
+                with open(secret_path, 'r') as f:  
+                    saved_code = f.read().strip()  
+                if current_code == saved_code:  
+                    with open(secret_path, 'w') as f:  
+                        f.write(new_code.strip())  
+                    flash("Secret code updated successfully!", "success")  
+                    log_admin_activity("[ADMIN] Updated Secret Code", 'system')  
+                else:  
+                    flash("Incorrect current secret code!", "danger")  
+                    return redirect(url_for('admin_about'))  
+            else:  
+                # If the file doesn't exist, create it with new code  
+                with open(secret_path, 'w') as f:  
+                    f.write(new_code.strip())  
+                flash("Secret code file created and saved!", "success")  
+                log_admin_activity("[ADMIN] Created initial Secret Code", 'system')  
 
-        db.session.add(about)
-        db.session.commit()
-        log_admin_activity(f"[ADMIN UPDATE SHOP_DETAILS] Updated shop information", 'system')
-        flash("Settings updated successfully!", "success")
-        return redirect(url_for('admin_about'))
+        # Commit the shop details changes
+        db.session.add(about)  
+        db.session.commit()  
+        log_admin_activity(f"[ADMIN UPDATE SHOP_DETAILS] Updated shop information", 'system')  
+        flash("Settings updated successfully!", "success")  
+        return redirect(url_for('admin_about'))  
 
     return render_template('admin_about.html', about=about)
 #---------------------------------------------------
@@ -1288,7 +1324,26 @@ def manage_products():
     
     return render_template('admin_products.html', products=products)
 
-# ADD PRODUCT 
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# Allowed file extensions for uploads
+app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.jpeg', '.gif']
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Create the uploads folder if it doesn't exist
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+# Serve uploaded files from the "uploads" folder
+@app.route('/uploads/<filename>')
+@csrf.exempt
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+# Add Product Route
 @app.route('/admin/add_product', methods=['GET', 'POST'])
 @admin_required
 def admin_add_product():
@@ -1298,106 +1353,91 @@ def admin_add_product():
         price = abs(float(request.form['price']))
         stock = abs(int(request.form['stock']))
         category = request.form['category']
-        image = request.files.get('image')
+        image = request.files['image']
 
-        image_url = None
-        if image and image.filename:
-            ext = os.path.splitext(image.filename)[1].lower()
-            if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
+        if image and image.filename:  
+            filename = secure_filename(image.filename)
+            ext = os.path.splitext(filename)[1].lower()
+
+            if ext not in app.config['UPLOAD_EXTENSIONS']:
                 flash("Invalid file format!", "error")
                 return redirect(url_for('admin_add_product'))
-
-            # Upload to Cloudinary
-            try:
-                upload_result = cloudinary.uploader.upload(image, folder="products")
-                image_url = upload_result['secure_url']
-            except Exception as e:
-                flash(f"Upload error: {str(e)}", "error")
-                return redirect(url_for('admin_add_product'))
         else:
-            flash("No image selected!", "error")
-            return redirect(url_for('admin_add_product'))
+            flash("No image selected")
+            filename = secure_filename('1743405389852.jpg')  # Default image name
 
-        new_product = Product(
-            name=name,
-            description=description,
-            price=price,
-            stock=stock,
-            category=category,
-            image_url=image_url
-        )
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        image.save(image_path)
 
+        new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}')
         db.session.add(new_product)
         db.session.commit()
-        log_admin_activity(f"[ADMIN ADD_PRODUCT] Added product: {new_product.name}", 'product', new_product.id)
+
         flash("Product added successfully!", "success")
         return redirect(url_for('admin_products'))
 
     return render_template("upload_product.html", product=None)
-    
+
+# Edit Product Route
 @app.route('/admin/edit_product/<int:product_id>', methods=['GET', 'POST'])
 @admin_required
 def admin_edit_product(product_id):
     product = Product.query.get_or_404(product_id)
 
-    if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        description = request.form.get('description', '').strip()
-        price = request.form.get('price', '').strip()
-        stock = request.form.get('stock', '').strip()
-        category = request.form.get('category', '').strip()
-        image = request.files.get('image')
+    if request.method == 'POST':  
+        name = request.form.get('name', '').strip()  
+        description = request.form.get('description', '').strip()  
+        price = request.form.get('price', '').strip()  
+        stock = request.form.get('stock', '').strip()  
+        category = request.form.get('category', '').strip()  
+        image = request.files.get('image')  
 
-        if not name or not description or not price or not stock:
-            flash("All fields are required!", "error")
-            return redirect(url_for('admin_edit_product', product_id=product.id))
+        # Ensure required fields are filled  
+        if not name or not description or not price or not stock:  
+            flash("All fields are required!", "error")  
+            return redirect(url_for('admin_edit_product', product_id=product.id))  
 
-        try:
-            product.price = abs(float(price))
-            product.stock = abs(int(stock))
-        except ValueError:
-            flash("Invalid price or stock value.", "error")
-            return redirect(url_for('admin_edit_product', product_id=product.id))
+        try:  
+            product.price = abs(float(price))  
+            product.stock = abs(int(stock))  
+        except ValueError:  
+            flash("Invalid price or stock value.", "error")  
+            return redirect(url_for('admin_edit_product', product_id=product.id))  
 
-        product.name = name
-        product.description = description
-        product.category = category
-        product.created_at = datetime.utcnow()
+        product.name = name  
+        product.description = description  
+        product.category = category  
+        product.created_at = datetime.utcnow()  
 
-        if image and image.filename:
-            ext = os.path.splitext(image.filename)[1].lower()
-            if ext not in ['.jpg', '.jpeg', '.png', '.gif']:
-                flash("Invalid file format!", "error")
-                return redirect(url_for('admin_edit_product', product_id=product.id))
+        if image and image.filename:  
+            filename = secure_filename(image.filename)  
+            ext = os.path.splitext(filename)[1].lower()  
+            
+            if ext not in app.config['UPLOAD_EXTENSIONS']:  
+                flash("Invalid file format!", "error")  
+                return redirect(url_for('admin_edit_product', product_id=product.id))  
 
-            # Upload new image to Cloudinary
-            try:
-                upload_result = cloudinary.uploader.upload(image, folder="products")
-                product.image_url = upload_result['secure_url']
-            except Exception as e:
-                flash(f"Upload failed: {str(e)}", "error")
-                return redirect(url_for('admin_edit_product', product_id=product.id))
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)  
+            image.save(image_path)  
+            product.image_url = f'/uploads/{filename}'  
 
         db.session.commit()
-        log_admin_activity(f"[ADMIN EDIT_PRODUCT] Updated product: {product.name}", 'product', product.id)
-        flash("Product updated successfully!", "success")
-        return redirect(url_for('admin_products'))
+        flash("Product updated successfully!", "success")  
+        return redirect(url_for('admin_products'))  
 
-    return render_template("upload_product.html", product=product)    
-    
-#DELETE PRODUCT 
-@app.route("/admin_delete_product/<int:product_id>", methods=['POST'])
+    return render_template("upload_product.html", product=product)
+
+# Delete Product Route
+@app.route("/admin/delete_product/<int:product_id>", methods=['POST'])
 @admin_required
 def admin_delete_product(product_id):
-    product=Product.query.get_or_404(product_id)
+    product = Product.query.get_or_404(product_id)
     try:
         db.session.delete(product)
         db.session.commit()
-        log_admin_activity(f" [ADMIN DELETE_PRODUCT] Deleted product: {product.name}", 'product', product.id)
         flash("Product has been deleted", "success")
     except IntegrityError as e:
-        flash("Product not Deleted!","error")
-        return redirect(url_for('admin_products'))
+        flash("Product not deleted!", "error")
     return redirect(url_for('admin_products'))
 
 #---------------------------------------------------
