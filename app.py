@@ -732,7 +732,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.jpeg', '.gif']
 
 # Set the upload folder path
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+UPLOAD_FOLDER = os.path.join(app.root_path, 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Create the upload folder if it doesn't exist
@@ -1353,19 +1353,8 @@ def manage_products():
     products=Product.query.all()
     
     return render_template('admin_products.html', products=products)
-
-#>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-# Allowed file extensions for uploads
-app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.jpeg', '.gif']
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
-
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Create the uploads folder if it doesn't exist
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+    
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # Serve uploaded files from the "uploads" folder
 @app.route('/uploads/<filename>')
