@@ -376,8 +376,9 @@ def logout():
 
 #---------------------------------------------------
 @app.route('/search-suggestions')
+@limiter.limit("50 per minute")
 def search_suggestions():
-    query = re.sub(r'[^a-zA-Z0-9\s]', '', query).lower()
+    query = request.args.get('q', '').lower()
     if not query:
         return jsonify(results=[])
 
@@ -385,8 +386,9 @@ def search_suggestions():
     return jsonify(results=[{'id': p.id, 'name': p.name} for p in results])
     
 @app.route('/search')
+@limiter.limit("20 per minute")
 def search_results():
-    query = re.sub(r'[^a-zA-Z0-9\s]', '', query)
+    query = request.args.get('q', '').lower()
     results = Product.query.filter(Product.name.ilike(f'%{query}%')).all()
     return render_template('search.html', products=results, query=query)    
 
@@ -505,6 +507,7 @@ def add_to_cart():
     
 # Update Cart Quantity
 @app.route('/update_cart', methods=['POST'])
+@limiter.limit("45 per minute")
 def update_cart():
     data = request.json
     product_id = str(data.get('product_id'))
@@ -579,6 +582,7 @@ def thank_you():
     return render_template('thank_you.html')
 #---------------------------------------------------
 @app.route('/place_order', methods=['POST'])
+@limiter.limit("50 per minute")
 @login_required  
 def place_order():
     user_id = current_user.id
@@ -741,6 +745,7 @@ def allowed_file(filename):
 
 # Update profile picture route
 @app.route("/update_profile_pic", methods=["POST"])
+@limiter.limit("10 per minute")
 @login_required
 def update_profile_pic():
     if 'profile_pic' not in request.files:
@@ -770,6 +775,7 @@ def update_profile_pic():
 
 # LOCATION UPDATE
 @app.route("/update_location", methods=["POST"])
+@limiter.limit("10 per minute")
 @login_required
 def update_location():
     location = request.form.get("location")
@@ -784,6 +790,7 @@ def update_location():
 
 # EMAIL UPDATE
 @app.route("/update_email", methods=["POST"])
+@limiter.limit("10 per minute")
 @login_required
 def update_email():
     email = request.form.get("email") 
@@ -811,6 +818,7 @@ def account_settings():
 
 #CHANGE PASSWORD
 @app.route("/change_password", methods=["POST"])
+@limiter.limit("20 per minute")
 @login_required
 def change_password():
     current_password = request.form.get("current_password")
@@ -854,6 +862,7 @@ def is_from_admin():
     return 'admin' == True
 
 @messaging_bp.route('/messages', methods=['GET', 'POST'])
+@limiter.limit("20 per minute")
 @csrf.exempt
 @login_required
 def messages():
@@ -930,6 +939,7 @@ def handle_join_room(data):
     join_room(str(data['user_id']))
 
 @socketio.on('send_message')
+@limiter.limit("20 per minute")
 @csrf.exempt
 def handle_send_message(data):
     msg = data['message']
@@ -1140,6 +1150,7 @@ def admin_settings():
 #--------------------------------------------------
 
 @app.route('/admin_secret', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 @admin_required
 def admin_secret():
     admin_setting = AdminSetting.query.first()
@@ -1173,6 +1184,7 @@ def manage_users():
 
 #BAN USER
 @app.route('/admin/ban-user/<int:user_id>', methods=['POST'])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_ban_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -1191,6 +1203,7 @@ def admin_ban_user(user_id):
 
 #UNBAN USER
 @app.route('/admin/unban-user/<int:user_id>', methods=['POST'])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_unban_user(user_id):
     user = User.query.get_or_404(user_id)
@@ -1209,6 +1222,7 @@ def admin_unban_user(user_id):
     
 #DELETE USER
 @app.route('/admin_delete_user/<int:user_id>', methods=['POST'])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_delete_user(user_id):
     user=User.query.get_or_404(user_id)
@@ -1224,6 +1238,7 @@ def admin_delete_user(user_id):
 
 #PROMOTE USER
 @app.route('/admin_promote_user/<int:user_id>', methods=['POST'])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_promote_user(user_id):
     user=User.query.get_or_404(user_id)
@@ -1246,6 +1261,7 @@ def admin_promote_user(user_id):
 
 #DEMOTE ADMIN
 @app.route('/admin_demote_user/<int:user_id>', methods=['POST'])
+@limiter.limit("20 per minute")
 @admin_required
 def admin_demote_user(user_id):
     user=User.query.get_or_404(user_id)
@@ -1268,6 +1284,7 @@ def admin_demote_user(user_id):
     
 #Deactivate User|ADMIN
 @app.route('/admin_deactivate_user/<int:user_id>', methods=['POST']) 
+@limiter.limit("10 per minute")
 def admin_deactivate_user(user_id):
     user = User.query.get_or_404(user_id)
     if current_user.id == user.id:
@@ -1286,6 +1303,7 @@ def admin_deactivate_user(user_id):
 
 #Activate User|ADMIN
 @app.route('/admin_activate_user/<int:user_id>', methods=['POST']) 
+@limiter.limit("20 per minute")
 def admin_activate_user(user_id):
     user = User.query.get_or_404(user_id)
     if current_user.id == user.id:
@@ -1357,6 +1375,7 @@ def uploaded_file(filename):
 
 # Add Product Route
 @app.route('/admin/add_product', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 @admin_required
 def admin_add_product():
     if request.method == 'POST':
@@ -1392,6 +1411,7 @@ def admin_add_product():
 
 # Edit Product Route
 @app.route('/admin/edit_product/<int:product_id>', methods=['GET', 'POST'])
+@limiter.limit("20 per minute")
 @admin_required
 def admin_edit_product(product_id):
     product = Product.query.get_or_404(product_id)
@@ -1441,6 +1461,7 @@ def admin_edit_product(product_id):
 
 # Delete Product Route
 @app.route("/admin/delete_product/<int:product_id>", methods=['POST'])
+@limiter.limit("20 per minute")
 @admin_required
 def admin_delete_product(product_id):
     product = Product.query.get_or_404(product_id)
@@ -1493,6 +1514,7 @@ def orders_data():
 
 
 @app.route('/admin/update_order', methods=['POST'])
+@limiter.limit("25 per minute")
 @admin_required
 def admin_update_order():
     data = request.json
@@ -1508,6 +1530,7 @@ def admin_update_order():
     return jsonify({'success': False, 'message': 'Order not found'}), 404
 
 @app.route('/admin/delete_order/<int:order_id>', methods=['POST'])
+@limiter.limit("50 per minute")
 @admin_required
 def admin_delete_order(order_id):
     order = Order.query.get_or_404(order_id)
