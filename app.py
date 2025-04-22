@@ -1405,8 +1405,15 @@ def admin_add_product():
 
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         image.save(image_path)
+        try:
+            im = pyimgur.Imgur(CLIENT_ID)
+            uploaded = im.upload_image(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            imgur_link = uploaded.link
+        except Exception as e:
+            print(f"Imgur upload failed: {e}")
+            imgur_link = None
 
-        new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}')
+        new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
         db.session.commit()
 
@@ -1428,7 +1435,7 @@ def admin_edit_product(product_id):
         price = request.form.get('price', '').strip()  
         stock = request.form.get('stock', '').strip()  
         category = request.form.get('category', '').strip()  
-        image = request.files.get('image')  
+        image = request.files.get('image') 
 
         # Ensure required fields are filled  
         if not name or not description or not price or not stock:  
@@ -1440,12 +1447,20 @@ def admin_edit_product(product_id):
             product.stock = abs(int(stock))  
         except ValueError:  
             flash("Invalid price or stock value.", "error")  
-            return redirect(url_for('admin_edit_product', product_id=product.id))  
+            return redirect(url_for('admin_edit_product', product_id=product.id))
+        try:
+            im = pyimgur.Imgur(CLIENT_ID)
+            uploaded = im.upload_image(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            imgur_link = uploaded.link
+        except Exception as e:
+            print(f"Imgur upload failed: {e}")
+            imgur_link = None
 
         product.name = name  
         product.description = description  
         product.category = category  
         product.created_at = datetime.utcnow()  
+        product.imgur_url = imgur_link
 
         if image and image.filename:  
             filename = secure_filename(image.filename)  
