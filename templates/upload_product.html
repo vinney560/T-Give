@@ -148,7 +148,7 @@
 
       {% if product and product.image_url %}
         <div class="uploaded-images">
-          <img src="{{ url_for('static', filename=product.image_url) }}" alt="Product Image">
+          <img src="{{ product.image_url }}" alt="{{ product.name }}">
         </div>
       {% endif %}
 

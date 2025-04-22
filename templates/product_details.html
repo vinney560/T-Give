@@ -184,7 +184,7 @@
   <marquee behavior="scroll" direction="left"><span style="color:#FCB245"><b>WE ARE T-GIVE ‼️️ WELCOME ALL</b></span></marquee>
   
   <h2>{{ product.name }}</h2>
-  <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy" class="product-image">
+  <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-image">
 
   <ul class="product-description">
     {% for line in product.description.split('\n') %}
