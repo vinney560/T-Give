@@ -16,3 +16,4 @@ gunicorn
 eventlet
 cloudinary
 python-dotenv
+pyimgur

@@ -24,6 +24,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask import send_file
 import zipfile
 import io
+import pyimgur
 from dotenv import load_dotenv
 load_dotenv()
 # ===================================================
@@ -95,6 +96,7 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=True)
     image_url = db.Column(db.String(200), nullable=False)
+    imgur_url = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=nairobi_time)
     category = db.Column(db.String(200), nullable=False)
     
@@ -246,6 +248,17 @@ def backup_images():
                      download_name='uploads_backup.zip',
                      as_attachment=True)
 
+def get_image_url(product):
+    import os
+    filename = os.path.basename(product.image_url or '')
+    local = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    if os.path.exists(local):
+        return product.image_url
+    elif product.imgur_url:
+        return product.imgur_url
+    else:
+        return "/uploads/default.jpg"
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
@@ -356,6 +369,8 @@ def welcome():
 def home(): 
     
     products = Product.query.all()
+    for product in products:
+        product.display_image = get_image_url(product)
     
     return render_template("index.html", products=products)
 #------------------------------‐--------------------
@@ -1625,6 +1640,44 @@ atexit.register(lambda: scheduler.shutdown())
 def manual_cleanup():
     cleanup_old_activities()
     return "Admin activity cleanup executed successfully!"
+
+#---------------------------------------------------
+import pyimgur
+
+CLIENT_ID = "3c32eed857d210b"
+
+@app.route('/admin/backup_imgur_fallbacks')
+@admin_required
+def backup_imgur_fallbacks():
+    uploads_folder = app.config['UPLOAD_FOLDER']
+    products = Product.query.all()
+    backed_up = 0
+    skipped = 0
+
+    im = pyimgur.Imgur(CLIENT_ID)
+
+    for product in products:
+        if product.imgur_url:
+            skipped += 1
+            continue  # already backed up
+
+        filename = os.path.basename(product.image_url)
+        local_path = os.path.join(uploads_folder, filename)
+
+        if os.path.exists(local_path):
+            try:
+                uploaded = im.upload_image(local_path, title=f"Backup: {filename}")
+                product.imgur_url = uploaded.link
+                backed_up += 1
+            except Exception as e:
+                print(f"[✗] Failed to upload {filename}: {e}")
+        else:
+            print(f"[!] File not found: {local_path}")
+
+    db.session.commit()
+    flash(f"Backed up {backed_up} product image(s) to Imgur. Skipped {skipped} already backed up.", "success")
+    return redirect(url_for('admin_dashboard'))  # Replace if needed
+
 
 #---------------------------------------------------
 @app.context_processor
