@@ -716,7 +716,9 @@ def user_dashboard():
                            cart_count=cart_item_count,
                            user_orders=user_orders, 
                            cart=cart)
+
 #-------------------------‐--------------------------
+
 @app.route("/profile")  
 @login_required  
 def profile():  
