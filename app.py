@@ -314,6 +314,7 @@ def backup_product_to_json(product):
     # Save back
     with open(backup_file, 'w') as f:
         json.dump(backup_data, f, indent=2)
+        
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
@@ -1470,8 +1471,8 @@ def admin_add_product():
 
         new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
-        backup_product_to_json(new_product)
         db.session.commit()
+        backup_product_to_json(new_product)
 
         flash("Product added successfully!", "success")
         return redirect(url_for('admin_products'))
