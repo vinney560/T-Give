@@ -24,6 +24,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask import send_file
 import zipfile
 import io
+import json
 import pyimgur
 from dotenv import load_dotenv
 load_dotenv()
@@ -217,6 +218,36 @@ def auto_logout_user():
             flash("Role has changed. Please log in again.", "error")
             return redirect(url_for('login'))
 
+@app.before_request
+def auto_restore_if_empty():
+    # Check if the products table is empty
+    if Product.query.count() == 0:
+        backup_file = os.path.join(app.root_path, 'imgur_backup.json')
+        
+        # Check if the backup file exists
+        if os.path.exists(backup_file):
+            try:
+                with open(backup_file, 'r') as f:
+                    data = json.load(f)
+                    
+                    # Restore products from the backup
+                    for item in data:
+                        product = Product(
+                            name=item.get("name", "Restored"),
+                            description=item.get("description", "Recovered from Imgur backup"),
+                            price=item.get("price", 0),
+                            image_url="/uploads/missing.jpg",  # Default image for missing ones
+                            imgur_url=item.get("imgur_url")
+                        )
+                        db.session.add(product)
+                    
+                    db.session.commit()
+                    print(f"[✓] Restored {len(data)} products from backup.")
+            except Exception as e:
+                print(f"[✗] Failed to restore from JSON: {e}")
+        else:
+            print("[!] Backup file not found.")
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -259,6 +290,30 @@ def get_image_url(product):
         return product.imgur_url
     else:
         return "/uploads/default.jpg"
+
+def backup_product_to_json(product):
+    backup_file = os.path.join(app.root_path, 'imgur_backup.json')
+    backup_data = []
+
+    # Load existing backup
+    if os.path.exists(backup_file):
+        with open(backup_file, 'r') as f:
+            try:
+                backup_data = json.load(f)
+            except Exception:
+                pass  # corrupted file or empty
+
+    # Add new entry
+    backup_data.append({
+        "name": product.name,
+        "description": product.description,
+        "price": product.price,
+        "imgur_url": product.imgur_url
+    })
+
+    # Save back
+    with open(backup_file, 'w') as f:
+        json.dump(backup_data, f, indent=2)
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
@@ -1415,6 +1470,7 @@ def admin_add_product():
 
         new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
+        backup_product_to_json(new_product)
         db.session.commit()
 
         flash("Product added successfully!", "success")
@@ -1692,8 +1748,7 @@ def backup_imgur_fallbacks():
     db.session.commit()
     flash(f"Backed up {backed_up} product image(s) to Imgur. Skipped {skipped} already backed up.", "success")
     return redirect(url_for('admin_dashboard'))  # Replace if needed
-
-
+                    
 #---------------------------------------------------
 @app.context_processor
 def inject_csrf_token():
