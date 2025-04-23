@@ -315,6 +315,10 @@ def backup_product_to_json(product):
     with open(backup_file, 'w') as f:
         json.dump(backup_data, f, indent=2)
         
+@app.route('/favicon.ico')
+def favicon():
+    return redirect(url_for('uploaded_file', filename='favicon.ico'))
+
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
