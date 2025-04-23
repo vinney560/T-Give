@@ -1,3 +1,5 @@
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, request, render_template, redirect, url_for, session, flash, g, jsonify, send_from_directory, Blueprint
 from flask_login import login_required, current_user, UserMixin, LoginManager, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
@@ -12,7 +14,6 @@ from datetime import datetime, timedelta
 from sqlalchemy import event, Index, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
-import eventlet.monkey_patch()
 import tempfile
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
