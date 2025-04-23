@@ -36,9 +36,8 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "3ab7b7e619e24a3ae40a46c79b9b80439251aa976d03eb909dfe37d4a4a927dd")
 app.config['SESSION_PERMANENT'] = True 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///e-commerce.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", 'sqlite:///e-commerce.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-os.getenv("DATABASE_URL")
 app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
 app.config['ACTIVITY_RETENTION_DAYS'] = 1
 # ===================================================
