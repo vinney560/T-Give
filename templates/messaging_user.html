@@ -14,9 +14,10 @@
             height: 100vh;
             overflow: hidden;
             font-family: 'Times New Roman', sans-serif;
+            padding-bottom: env(safe-area-inset-bottom); /* Ensure safe area for mobile browsers */
         }
         .chat-container {
-            height: 87vh;
+            height: calc(100vh - 60px); /* Adjusting the height for the header */
             width: 100vw;
             display: flex;
             flex-direction: column;
@@ -30,6 +31,7 @@
             color: #00ffc3;
             border-bottom: 2px solid #58a6ff;
             text-shadow: 0 0 8px #00ffc3;
+            height: 60px; /* Ensure fixed header height */
         }
         .chat-box {
             flex: 1;
@@ -39,6 +41,7 @@
             flex-direction: column;
             gap: 12px;
             background: #0d1117;
+            margin-bottom: 10px; /* Space for bottom-safe area */
         }
         .chat-message {
             padding: 8px 28px;
@@ -66,6 +69,8 @@
             padding: 16px;
             background: rgba(31,41,55,0.9);
             border-top: 2px solid #58a6ff;
+            position: sticky;
+            bottom: 0;
         }
         .input-container {
             position: relative;
@@ -209,6 +214,23 @@
                 sendMessage();
             }
         });
+
+        // Adjust for the mobile keyboard visibility
+        window.addEventListener('resize', adjustForKeyboard);
+
+        function adjustForKeyboard() {
+            const chatInput = document.querySelector('.chat-input');
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+
+            if (windowHeight < documentHeight) {
+                // Add bottom padding when the keyboard is visible
+                chatInput.style.paddingBottom = '15px'; // Adjust this as needed
+            } else {
+                // Remove bottom padding when the keyboard is not visible
+                chatInput.style.paddingBottom = '0';
+            }
+        }
     </script>
 </body>
 </html>

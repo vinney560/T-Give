@@ -20,6 +20,9 @@
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+    .upper-container {
+      margin-bottom: 30px;
+    }
     .product-details h2 {
       font-size: 2rem;
       color: #333;
@@ -181,42 +184,48 @@
 
 <div class="product-details">
   <button class="back-btn" onclick="closePage()">✖</button>
-  <marquee behavior="scroll" direction="left"><span style="color:#FCB245"><b>WE ARE T-GIVE ‼️️ WELCOME ALL</b></span></marquee>
-  
-  <h2>{{ product.name }}</h2>
-  <img src="{{ product.image_url }}"
-     onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
-     alt="{{ product.name }}" class="product-image">
 
-  <ul class="product-description">
-    {% for line in product.description.split('\n') %}
-      <li>{{ line }}</li>
-    {% endfor %}
-  </ul>
-
-  <p class="price">Price: Ksh {{ product.price }}</p>
-
-  <label for="quantity" style="font-size: 1.1rem; margin-right: 10px;">Quantity:</label>
-  <input type="number" id="quantity" name="quantity" min="1" value="1"
-         style="padding: 8px; width: 80px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; text-align: center;" required>
-  <button onclick="addToCart({{ product.id }}, this)" class="glow-button">Add to Cart</button>
-
-  <div class="rating-container">
-    <span class="star" data-value="1">&#9733;</span>
-    <span class="star" data-value="2">&#9733;</span>
-    <span class="star" data-value="3">&#9733;</span>
-    <span class="star" data-value="4">&#9733;</span>
-    <span class="star" data-value="5">&#9733;</span>
+  <!-- Upper Container: Product Image and Name -->
+  <div class="upper-container">
+    <marquee behavior="scroll" direction="left"><span style="color:#FCB245"><b>WE ARE T-GIVE ‼️️ WELCOME ALL</b></span></marquee>
+    <h2>{{ product.name }}</h2>
+    <img src="{{ product.image_url }}"
+       onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
+       alt="{{ product.name }}" class="product-image">
   </div>
-  <p>Your Rating: <span id="rating-result">Not Rated</span></p>
 
-  <form onsubmit="event.preventDefault(); submitRating({{ product.id }});">
-    <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
-    <button type="submit" class="submit-rating-btn">Submit Rating</button>
-  </form>
+  <!-- Lower Container: Product Description, Price, Rating, etc. -->
+  <div class="lower-container">
+    <ul class="product-description">
+      {% for line in product.description.split('\n') %}
+        <li>{{ line }}</li>
+      {% endfor %}
+    </ul>
 
-  <p id="average-rating">Average Rating: {{ average_rating }}</p>
-  
+    <p class="price">Price: Ksh {{ product.price }}</p>
+
+    <label for="quantity" style="font-size: 1.1rem; margin-right: 10px;">Quantity:</label>
+    <input type="number" id="quantity" name="quantity" min="1" value="1"
+           style="padding: 8px; width: 80px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; text-align: center;" required>
+    <button onclick="addToCart({{ product.id }}, this)" class="glow-button">Add to Cart</button>
+
+    <div class="rating-container">
+      <span class="star" data-value="1">&#9733;</span>
+      <span class="star" data-value="2">&#9733;</span>
+      <span class="star" data-value="3">&#9733;</span>
+      <span class="star" data-value="4">&#9733;</span>
+      <span class="star" data-value="5">&#9733;</span>
+    </div>
+    <p>Your Rating: <span id="rating-result">Not Rated</span></p>
+
+    <form onsubmit="event.preventDefault(); submitRating({{ product.id }});">
+      <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="submit-rating-btn">Submit Rating</button>
+    </form>
+
+    <p id="average-rating">Average Rating: {{ average_rating }}</p>
+  </div>
+
   <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">🛒</button>
 </div>
 
