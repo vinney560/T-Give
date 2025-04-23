@@ -59,9 +59,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*",  async_mode='eventlet')
 
 csrf = CSRFProtect()
-csrf.init_app(app)  # Attach CSRF protection
-
-#app.permanent_session_lifetime = timedelta(minutes=45)
+csrf.init_app(app)
 
 os.environ['TZ'] = 'Africa/Nairobi'
 
