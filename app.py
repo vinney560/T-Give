@@ -113,7 +113,7 @@ class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.mobile'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     
     # Ensure a user can rate a product only once
     __table_args__ = (db.UniqueConstraint('user_id', 'product_id', name='_user_product_uc'),)
@@ -137,7 +137,7 @@ class Order(db.Model):
 class UserMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    mobile = db.Column(db.Integer, db.ForeignKey('user.mobile'), nullable=False)
+    mobile = db.Column(db.String(10), db.ForeignKey('user.mobile'), nullable=False)
     message = db.Column(db.Text, nullable=False)
     is_from_admin = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=nairobi_time)
