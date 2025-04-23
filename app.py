@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import event, Index, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
-import eventlet
+import eventlet.monkey_patch()
 import tempfile
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
