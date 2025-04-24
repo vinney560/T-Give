@@ -1516,7 +1516,7 @@ def admin_add_product():
         new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
         db.session.commit()
-        log_admin_activity(f"[ADMIN ADD PRODUCT] Added product: {{ product.name }}")
+        log_admin_activity(f"[ADMIN ADD PRODUCT] Added product: {{ new_product.name }}")
         backup_product_to_json(new_product)
 
         flash("Product added successfully!", "success")
@@ -1577,7 +1577,7 @@ def admin_edit_product(product_id):
             product.image_url = f'/uploads/{filename}'  
 
         db.session.commit()
-        log_admin_activity("[ADMIN EDIT PRODUCT] Edited product: {{ product.name }}")
+        log_admin_activity(f"[ADMIN EDIT PRODUCT] Edited product: {{ product.name }}")
         flash("Product updated successfully!", "success")  
         return redirect(url_for('admin_products'))  
 
@@ -1592,7 +1592,7 @@ def admin_delete_product(product_id):
     try:
         db.session.delete(product)
         db.session.commit()
-        log_admin_activity("[ADMIN DELETE PRODUCT] Deleted product: {{ product.name }}")
+        log_admin_activity(f"[ADMIN DELETE PRODUCT] Deleted product: {{ product.name }}")
         flash("Product has been deleted", "success")
     except IntegrityError as e:
         flash("Product not deleted!", "error")
