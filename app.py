@@ -1516,7 +1516,7 @@ def admin_add_product():
         new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
         db.session.commit()
-        log_admin_activity(f"[ADMIN ADD PRODUCT] Added product: {{ new_product.name }}")
+        log_admin_activity(f"[ADMIN ADD PRODUCT] Added product: {new_product.name}", target_type="product", target_id=new_product.id)
         backup_product_to_json(new_product)
 
         flash("Product added successfully!", "success")
@@ -1577,7 +1577,7 @@ def admin_edit_product(product_id):
             product.image_url = f'/uploads/{filename}'  
 
         db.session.commit()
-        log_admin_activity(f"[ADMIN EDIT PRODUCT] Edited product: {{ product.name }}")
+        log_admin_activity(f"[ADMIN EDIT PRODUCT] Edited product: {product.name}", target_type="product", target_id=product.id)
         flash("Product updated successfully!", "success")  
         return redirect(url_for('admin_products'))  
 
@@ -1592,7 +1592,7 @@ def admin_delete_product(product_id):
     try:
         db.session.delete(product)
         db.session.commit()
-        log_admin_activity(f"[ADMIN DELETE PRODUCT] Deleted product: {{ product.name }}")
+        log_admin_activity(f"[ADMIN ADD PRODUCT] Deleted product: {product.name}", target_type="product", target_id=product.id)
         flash("Product has been deleted", "success")
     except IntegrityError as e:
         flash("Product not deleted!", "error")
@@ -1765,7 +1765,29 @@ atexit.register(lambda: scheduler.shutdown())
 def manual_cleanup():
     cleanup_old_activities()
     return "Admin activity cleanup executed successfully!"
+#----------------------------------------------------
+@app.route('/admin/activities/clean', methods=['POST'])
+@admin_required
+def clear_old_activities():
+    days = int(request.form.get('days', 2))  # Default: 30 days
+    cutoff = datetime.utcnow() - timedelta(days=days)
 
+    deleted = AdminActivity.query.filter(AdminActivity.timestamp < cutoff).delete()
+    db.session.commit()
+
+    flash(f"Deleted {deleted} activity logs older than {days} days.", "success")
+    return redirect(url_for('admin_activities'))
+    
+@app.route('/admin/activities/clean_hourly', methods=['POST'])
+@admin_required
+def clear_hourly_logs():
+    cutoff = datetime.utcnow() - timedelta(hours=1)
+    deleted = AdminActivity.query.filter(AdminActivity.timestamp < cutoff).delete()
+    log_admin_activity("[ADMIN CLEAN LOGS] Cleaned old logs")
+    db.session.commit()
+
+    flash(f"Deleted {deleted} logs older than 1 hour.", "success")
+    return redirect(url_for('admin_activities'))    
 #---------------------------------------------------
 import pyimgur
 
