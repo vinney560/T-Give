@@ -39,7 +39,7 @@ app.config['SESSION_PERMANENT'] = True
 db_url = os.getenv("DATABASE_URL")
 if not db_url:
     raise RuntimeError("❌ DATABASE_URL is missing. Make sure it's set in Render env settings.")
-app.config['SQLALCHEMY_DATABASE_URI'] = db_ur
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
 app.config['ACTIVITY_RETENTION_DAYS'] = 1
