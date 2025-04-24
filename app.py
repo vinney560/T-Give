@@ -1766,10 +1766,10 @@ def manual_cleanup():
     cleanup_old_activities()
     return "Admin activity cleanup executed successfully!"
 #----------------------------------------------------
-@app.route('/admin/activities/clean', methods=['POST'])
+@app.route('/admin/activities/clean')
 @admin_required
 def clear_old_activities():
-    days = int(request.form.get('days', 2))  # Default: 30 days
+    days = int(request.form.get('days', 7))
     cutoff = datetime.utcnow() - timedelta(days=days)
 
     deleted = AdminActivity.query.filter(AdminActivity.timestamp < cutoff).delete()
@@ -1778,7 +1778,7 @@ def clear_old_activities():
     flash(f"Deleted {deleted} activity logs older than {days} days.", "success")
     return redirect(url_for('admin_activities'))
     
-@app.route('/admin/activities/clean_hourly', methods=['POST'])
+@app.route('/admin/activities/clean_hourly')
 @admin_required
 def clear_hourly_logs():
     cutoff = datetime.utcnow() - timedelta(hours=1)
