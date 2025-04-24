@@ -1676,12 +1676,6 @@ def account():
     return render_template('admin_account.html', user=user)
   
 #----------------------------------------------------
-from user_agents import parse
-
-ua_string = request.headers.get('User-Agent', '')
-ua = parse(ua_string)
-device_info = f"{ua.os.family} ({ua.device.family}) - {ua.browser.family}"
-#----------------------------------------------------
 
 @app.route('/admin/activities')
 @admin_required
@@ -1715,6 +1709,12 @@ def log_admin_activity(action, target_type=None, target_id=None):
         if not admin_id:
             raise Exception("Admin not authenticated")
 
+        #-----------------------------------------------
+        from user_agents import parse
+        ua_string = request.headers.get('User-Agent', '')
+        ua = parse(ua_string)
+        device_info = f"{ua.os.family} ({ua.device.family}) - {ua.browser.family}"
+        #----------------------------------------------
         activity = AdminActivity(
             admin_id=admin_id,
             action=action,
@@ -1739,7 +1739,7 @@ def log_admin_activity(action, target_type=None, target_id=None):
 
     except Exception as e:
         db.session.rollback()
-        app.logger.error(f"[ActivityLog] Failed: {str(e)}") 
+        app.logger.error(f"[ActivityLog] Failed: {str(e)}")
 
 def cleanup_old_activities():
     with app.app_context():
