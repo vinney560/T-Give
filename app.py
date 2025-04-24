@@ -281,7 +281,8 @@ def backup_images():
     return send_file(memory_file, mimetype='application/zip',
                      download_name='uploads_backup.zip',
                      as_attachment=True)
-
+    log_admin_activity("[ADMIN BACKUP] Downloaded backup_data")
+    
 def get_image_url(product):
     import os
     filename = os.path.basename(product.image_url or '')
@@ -414,6 +415,8 @@ def register():
         
         flash("©️  Welcome! To T-Give", "success")
         login_user(new_user)
+        if user.role == 'admin':
+            log_admin_activity(f"[ADMIN REGISTER] User: {user.mobile} registered as Admin", 'user', user.id)
         return redirect(url_for('welcome'))
 
     return render_template('register.html')
@@ -1084,6 +1087,7 @@ def db_storage():
         cursor.close()
         conn.close()
         return render_template('admin_storage.html', tables=table_sizes)
+        log_admin_activity("[ADMIN VIEW DB] Viewed database storage")
     except Exception as e:
         return f"<h3>Error: {e}</h3>"
 
@@ -1101,6 +1105,7 @@ def admin_dashboard():
 @app.route('/admin/quick_view')
 @admin_required
 def quick_view():
+    log_admin_activity("[ADMIN VIEW] Viewed web's activities")
     return render_template('admin_quick_view.html')
 
 # API Endpoints
@@ -1171,6 +1176,8 @@ def admin_panel():
     users = User.query.order_by(User.id.desc()).all()
     products=Product.query.order_by(Product.id.desc()).all()
     orders=Order.query.order_by(Order.id.desc()).all()
+    
+    log_admin_activity("[ADMIN VIEW] Viewed Panel")
    
     return render_template('admin_panel.html', users=users, products=products,  orders=orders)
 
@@ -1440,7 +1447,7 @@ def admin_activate_user(user_id):
 @csrf.exempt
 def manage_emails():       
     users = User.query.all()
-    
+    log_admin_activity("[ADMIN VIEW] Viewed Emails")
     return render_template('admin_manage_emails.html', users=users)
 
 #---------------------------------------------------
@@ -1509,6 +1516,7 @@ def admin_add_product():
         new_product = Product(name=name, description=description, price=price, stock=stock, category=category, image_url=f'/uploads/{filename}', imgur_url = imgur_link)
         db.session.add(new_product)
         db.session.commit()
+        log_admin_activity("[ADMIN ADD PRODUCT] Added product: {product.name}")
         backup_product_to_json(new_product)
 
         flash("Product added successfully!", "success")
@@ -1569,6 +1577,7 @@ def admin_edit_product(product_id):
             product.image_url = f'/uploads/{filename}'  
 
         db.session.commit()
+        log_admin_activity("[ADMIN EDIT PRODUCT] Edited product: {product.name}")
         flash("Product updated successfully!", "success")  
         return redirect(url_for('admin_products'))  
 
