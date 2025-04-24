@@ -18,3 +18,4 @@ cloudinary
 python-dotenv
 pyimgur
 psycopg2-binary>=2.9
+pg8000

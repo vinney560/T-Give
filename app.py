@@ -20,6 +20,7 @@ import atexit
 from functools import wraps
 from flask import abort
 import os
+import pg8000
 import re
 from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask import send_file
@@ -1057,6 +1058,36 @@ def about():
 
 #===================================================
 #                       >>>>ADMIN ENDPOINTS<<<<<
+#===================================================
+
+@app.route('/admin/db_storage')
+@admin_required 
+def db_storage():
+    try:
+        conn = pg8000.connect(
+            user="tgive3_owner",
+            password="npg_0ZwEQleozq3O",
+            host="ep-snowy-silence-a8kfnz7h-pooler.eastus2.azure.neon.tech",
+            database="tgive3",
+            ssl_context=True
+        )
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT
+              table_schema || '.' || table_name AS table,
+              pg_size_pretty(pg_total_relation_size(table_schema || '.' || table_name)) AS size
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+            ORDER BY pg_total_relation_size(table_schema || '.' || table_name) DESC
+        """)
+        table_sizes = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return render_template('admin_storage.html', tables=table_sizes)
+    except Exception as e:
+        return f"<h3>Error: {e}</h3>"
+
+#===================================================
 #===================================================
 
 @app.route('/admin/dashboard')
