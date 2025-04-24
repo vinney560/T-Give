@@ -173,7 +173,7 @@
                                 {% if activity.target_id %} #{{ activity.target_id }} {% else %} <span class="na">N/A</span> {% endif %}
                             </td>
                             <td data-label="IP" class="ip-address">{{ activity.ip_address }}</td>
-                            <td data-label="DEVICE" class="device-info" title="{{ activity.user_agent }}">{{ activity.user_agent|truncate(500, True) }}</td>
+                            <td data-label="DEVICE" class="device-info" title="{{ activity.user_agent }}">{{ activity.user_agent|truncate(100, True) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

@@ -1676,6 +1676,12 @@ def account():
     return render_template('admin_account.html', user=user)
   
 #----------------------------------------------------
+from user_agents import parse
+
+ua_string = request.headers.get('User-Agent', '')
+ua = parse(ua_string)
+device_info = f"{ua.os.family} ({ua.device.family}) - {ua.browser.family}"
+#----------------------------------------------------
 
 @app.route('/admin/activities')
 @admin_required
@@ -1715,7 +1721,7 @@ def log_admin_activity(action, target_type=None, target_id=None):
             target_type=target_type,
             target_id=target_id,
             ip_address=request.headers.get('X-Forwarded-For', request.remote_addr),
-            user_agent=request.headers.get('User-Agent', '')[:500]
+            user_agent=device_info
         )
 
         db.session.add(activity)
