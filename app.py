@@ -1728,7 +1728,7 @@ def log_admin_activity(action, target_type=None, target_id=None):
             'target_type': target_type or 'system',
             'target_id': target_id,
             'ip': activity.ip_address,
-            'device': activity.user_agent[:70] + '...' if len(activity.user_agent) > 70 else activity.user_agent
+            'device': activity.user_agent[:100] + '...' if len(activity.user_agent) > 35 else activity.user_agent
         }, namespace='/activities', room='admin_activities')
 
     except Exception as e:
