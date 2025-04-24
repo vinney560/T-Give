@@ -1776,7 +1776,7 @@ def clear_old_activities():
     db.session.commit()
 
     flash(f"Deleted {deleted} activity logs older than {days} days.", "success")
-    return redirect(url_for('admin_activities'))
+    return redirect(url_for('admin_dashboard'))
     
 @app.route('/admin/activities/clean_hourly')
 @admin_required
@@ -1787,7 +1787,7 @@ def clear_hourly_logs():
     db.session.commit()
 
     flash(f"Deleted {deleted} logs older than 1 hour.", "success")
-    return redirect(url_for('admin_activities'))    
+    return redirect(url_for('admin_dashboard'))    
 #---------------------------------------------------
 import pyimgur
 
