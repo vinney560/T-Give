@@ -261,7 +261,7 @@ def auto_restore_if_empty():
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
+        if not current_user.is_authenticated or current_user.role not in ['admin', 'superadmin']:
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
@@ -1346,6 +1346,9 @@ def admin_ban_user(user_id):
     if current_user.id == user.id:
         flash('Can not BAN yourself', 'error')
         return redirect(url_for('manage_users'))
+    if user.role == 'superadmin':
+        flash("NOT ALLOWED!")
+        return redirect(url_for('manage_users'))
     if user.role == 'banned':
         flash('User already Banned', 'error')
         return redirect(url_for('manage_users'))
@@ -1365,7 +1368,7 @@ def admin_unban_user(user_id):
     if current_user.id == user.id:
         flash('Can not UNBAN yourself', 'error')
         return redirect(url_for('manage_users'))
-    if user.role == 'admin' or user.role == 'user' or user.active == True:
+    if user.role == 'admin' or user.role == 'user' or user.active == True or user.role == 'superadmin':
         flash('User was never Banned')
         return redirect('manage_users', 'danger')    
     user.role='user'
@@ -1381,6 +1384,9 @@ def admin_unban_user(user_id):
 @admin_required
 def admin_delete_user(user_id):
     user=User.query.get_or_404(user_id)
+    if user.role == 'superadmin':
+        flash("NOT ALLOWED!")
+        return redirect(url_for('manage_users'))
     if current_user.id == user.id:
         flash('Can not DELETE yourself', 'error')
         log_admin_activity("[ADMIN FORGE DELETE] Tried to Delete him/herself",  'user', user.id)
@@ -1455,6 +1461,9 @@ def admin_deactivate_user(user_id):
     if user.active == False and user.role == 'inactive':
         flash('User already inactive', 'error')
         return redirect(url_for('manage_users'))
+    if user.role == 'superadmin':
+        flash("NOT ALLOWED!")
+        return redirect(url_for('manage_users'))
     user.active = False
     user.role = 'inactive'
     db.session.commit()
@@ -1474,7 +1483,7 @@ def admin_activate_user(user_id):
     if user.role == 'banned':
         flash('User was Banned', 'error')
         return redirect(url_for('manage_users'))
-    if user.active == True and (user.role == 'user' or user.role == 'admin'):
+    if user.active == True and (user.role == 'user' or user.role == 'admin' or user.role == 'superadmin'):
         flash('User already Active', 'error')
         return redirect(url_for('manage_users'))
     user.active = True
