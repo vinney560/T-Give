@@ -1356,7 +1356,10 @@ def super_admin_secret():
 @app.route('/admin/manage_users')
 @admin_required
 def manage_users():
-    users = User.query.all()
+    if current_user.role == 'superadmin':
+        users = User.query.filter(User.id != current_user.id).all()
+    else:
+        users = User.query.filter_by(role='user').filter(User.id != current_user.id).all()
     return render_template('admin_manage_users.html', users=users)
 
 #BAN USER
