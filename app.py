@@ -1125,6 +1125,10 @@ def db_storage():
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
+@app.route('/super_admin/dashboard')
+@superadmin_required
+def super_admin_dashboard():
+    return render_template('super_admin_dashboard.html')
 #---------------------------------------------------
 
 @app.route('/admin/quick_view')
@@ -1196,7 +1200,7 @@ def format_product(product):
 #---------------------------------------------------
 
 @app.route('/admin/panel')
-@admin_required
+@superadmin_required
 def admin_panel():    
     users = User.query.order_by(User.id.desc()).all()
     products=Product.query.order_by(Product.id.desc()).all()
@@ -1284,16 +1288,21 @@ def admin_about():
 #---------------------------------------------------
 
 @app.route("/admin/admin_settings")
-@admin_required
+@superadmin_required
 def admin_settings():
     admin_setting = AdminSetting.query.first()
     return render_template('admin_settings.html', admin_secret=admin_setting.secret if admin_setting else '')
 
+@app.route("/admin/super_admin_settings")
+@superadmin_required
+def super_admin_settings():
+    super_admin_setting = SuperAdminSetting.query.first()
+    return render_template('super_admin_settings.html', admin_secret=super_admin_setting.super_secret if super_admin_setting else '')
 #--------------------------------------------------
 
 @app.route('/admin_secret', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
-@admin_required
+@superadmin_required
 def admin_secret():
     admin_setting = AdminSetting.query.first()
     
@@ -1314,7 +1323,7 @@ def admin_secret():
 
 @app.route('/super_admin_secret', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
-@admin_required
+@superadmin_required
 def super_admin_secret():
     super_admin_setting = SuperAdminSetting.query.first()
     
