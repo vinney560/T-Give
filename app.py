@@ -432,8 +432,8 @@ def register():
         
         flash("©️  Welcome! To T-Give", "success")
         login_user(new_user)
-        if user.role == 'admin':
-            log_admin_activity(f"[ADMIN REGISTER] User: {user.mobile} registered as Admin", 'user', user.id)
+        #if user.role == 'admin':
+#            log_admin_activity(f"[ADMIN REGISTER] User: {user.mobile} registered as Admin", 'user', user.id)
         return redirect(url_for('welcome'))
 
     return render_template('register.html')
