@@ -421,7 +421,7 @@ def register():
             db.session.commit()
             super_admin_setting = SuperAdminSetting.query.first()
             
-        if super_admin_setting and admin_secret_input == super_admin_setting.secret:
+        if super_admin_setting and admin_secret_input == super_admin_setting.super_secret:
             role = 'superadmin'
         else:
             role = 'user'
@@ -1313,7 +1313,7 @@ def super_admin_secret():
     if request.method == 'POST':
         new_secret = request.form.get('current_secret')
         if super_admin_setting:
-            super_admin_setting.secret = new_secret
+            super_admin_setting.super_secret = new_secret
         else:
             super_admin_setting = SuperAdminSetting(super_secret=new_secret)
             db.session.add(super_admin_setting)
@@ -1323,7 +1323,7 @@ def super_admin_secret():
         flash("Super Admin secret updated successfully!", "success")
         return redirect(url_for('super_admin_secret'))
     
-    return render_template('super_admin_settings.html', super_admin_secret=super_admin_setting.secret if super_admin_setting else '')
+    return render_template('super_admin_settings.html', super_admin_secret=super_admin_setting.super_secret if super_admin_setting else '')
 
 #---------------------------------------------------
 #                          ____MESSAGING ROUTES____
