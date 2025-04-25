@@ -1434,6 +1434,10 @@ def admin_promote_user(user_id):
         return redirect(url_for('manage_users'))
     if user.role == 'admin':
         flash('User already Admin',  'error')
+        user.role='superadmin'
+        user.active=True
+        db.session.commit()
+        flash("User Super Admin", "success")
         return redirect(url_for('manage_users'))
     if user.role == 'banned':
         flash('User was Banned', 'error')
@@ -1441,7 +1445,7 @@ def admin_promote_user(user_id):
     user.role='admin'
     user.active=True
     db.session.commit()
-    log_admin_activity(f"[ADMIN PROMOTE] Promoted {user.mobile} to admin", 'user', user.id)
+    log_admin_activity(f"[SUPER ADMIN PROMOTE] Promoted {user.mobile} to admin", 'user', user.id)
     flash(f"User {user.mobile} will be an admin", "success")
     return redirect(url_for('manage_users'))
 
