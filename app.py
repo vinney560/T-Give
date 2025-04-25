@@ -373,7 +373,12 @@ def login():
             else:
                 pass
             flash("♻ Welcome back! ", "success")
-            return redirect(url_for('admin_dashboard' if user.role == 'admin' or user.role == 'superadmin' else 'products'))   
+            if user.role == 'superadmin':
+                return redirect(url_for('super_admin_dashboard'))
+            elif user.role == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('products'))
 
         flash("Invalid credentials.", "error")
         return render_template("login.html", mobile=raw_mobile, password=password)
