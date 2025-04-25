@@ -1331,21 +1331,32 @@ def admin_secret():
 @superadmin_required
 def super_admin_secret():
     super_admin_setting = SuperAdminSetting.query.first()
-    
-    if request.method == 'POST':
-        new_secret = request.form.get('current_secret')
-        if super_admin_setting:
-            super_admin_setting.super_secret = new_secret
-        else:
-            super_admin_setting = SuperAdminSetting(super_secret=new_secret)
-            db.session.add(super_admin_setting)
 
+    if request.method == 'POST':
+        current_secret = request.form.get('current_secret')
+        new_secret = request.form.get('new_secret')
+
+        if not super_admin_setting:
+            flash("Super admin settings not initialized.", "error")
+            return redirect(url_for('super_admin_secret'))
+
+        # Check if current secret matches
+        if current_secret != super_admin_setting.super_secret:
+            flash("Incorrect current super admin secret.", "error")
+            return redirect(url_for('super_admin_secret'))
+
+        if not new_secret or len(new_secret.strip()) < 6:
+            flash("New secret must be at least 6 characters.", "error")
+            return redirect(url_for('super_admin_secret'))
+
+        # Update the secret
+        super_admin_setting.super_secret = new_secret.strip()
         db.session.commit()
-        log_admin_activity(f"[ADMIN UPDATE ADMIN_SECRET] Updated admin secret", 'system')
-        flash("Super Admin secret updated successfully!", "success")
+
+        flash("Super Admin secret updated!", "success")
         return redirect(url_for('super_admin_secret'))
-    
-    return render_template('super_admin_settings.html', super_admin_secret=super_admin_setting.super_secret if super_admin_setting else '')
+
+    return render_template('super_admin_settings.html')
 
 #---------------------------------------------------
 #                          ____MESSAGING ROUTES____
