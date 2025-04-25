@@ -84,25 +84,15 @@
     <div class="field-group">
       <label for="current_secret">Current Secret:</label><br>
       <input type="password" name="current_secret" id="current_secret" required placeholder="Enter current secret" value='{{ current_secret }}'>
-      <span class="toggle-eye" onclick="toggleVisibility('current_secret')">👁️</span>
     </div>
 
     <div class="field-group">
       <label for="new_secret">New Secret:</label><br>
       <input type="password" name="new_secret" id="new_secret" required placeholder="Enter new secret" value='{{ new_secret }}'>
-      <span class="toggle-eye" onclick="toggleVisibility('new_secret')">👁️</span>
     </div>
 
     <button type="submit">Update Secret</button>
   </form>
 </div>
-
-<script>
-  function toggleVisibility(id) {
-    const input = document.getElementById(id);
-    input.type = input.type === 'password' ? 'text' : 'password';
-  }
-</script>
-
 </body>
 </html>
