@@ -153,6 +153,13 @@ class AdminSetting(db.Model):
 
     def __repr__(self):
         return f'<AdminSetting {self.secret}>'  
+#for the CEOs
+class SuperAdminSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    super_secret = db.Column(db.String(255), nullable=False, default='479superadmin479')
+
+    def __repr__(self):
+        return f'<SuperAdminSetting {self.secret}>'
 #---------------------------------------------------
 class About(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -254,7 +261,7 @@ def auto_restore_if_empty():
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or current_user.role != 'admin':
+        if not current_user.is_authenticated or current_user.role != 'admin' or current_user.role != 'superadmin':
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
@@ -358,7 +365,7 @@ def login():
             else:
                 pass
             flash("♻ Welcome back! ", "success")
-            return redirect(url_for('admin_dashboard' if user.role == 'admin' else 'products'))   
+            return redirect(url_for('admin_dashboard' if user.role == 'admin' or user.role == 'superadmin' else 'products'))   
 
         flash("Invalid credentials.", "error")
         return render_template("login.html", mobile=raw_mobile, password=password)
@@ -406,8 +413,15 @@ def register():
         if admin_setting and admin_secret_input == admin_setting.secret:
             role = 'admin'
         else:
-            role = 'user'
-        
+            super_admin_setting = SuperAdminSetting.query.first()
+            if not super_admin_setting:
+                new_setting = SuperAdminSetting(super_secret='479superadmin479')
+                db.session.add(new_setting)
+                db.session.commit()
+            if super_admin_setting and admin_secret_input == super_admin_setting.secret:
+                role = 'superadmin'
+            else:
+                role = 'user'
         hashed_password = generate_password_hash(password)
         new_user = User(mobile=mobile, password=hashed_password, role=role, location=location, email=email, agreed=True)
         db.session.add(new_user)
@@ -1287,6 +1301,27 @@ def admin_secret():
     
     return render_template('admin_settings.html', admin_secret=admin_setting.secret if admin_setting else '')
 
+@app.route('/super_admin_secret', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
+@admin_required
+def super_admin_secret():
+    super_admin_setting = SuperAdminSetting.query.first()
+    
+    if request.method == 'POST':
+        new_secret = request.form.get('current_secret')
+        if super_admin_setting:
+            super_admin_setting.secret = new_secret
+        else:
+            super_admin_setting = SuperAdminSetting(super_secret=new_secret)
+            db.session.add(super_admin_setting)
+
+        db.session.commit()
+        log_admin_activity(f"[ADMIN UPDATE ADMIN_SECRET] Updated admin secret", 'system')
+        flash("Super Admin secret updated successfully!", "success")
+        return redirect(url_for('super_admin_secret'))
+    
+    return render_template('super_admin_settings.html', super_admin_secret=super_admin_setting.secret if super_admin_setting else '')
+
 #---------------------------------------------------
 #                          ____MESSAGING ROUTES____
 
@@ -1369,6 +1404,9 @@ def admin_promote_user(user_id):
     if user.role == 'banned':
         flash('User was Banned', 'error')
         return redirect(url_for('manage_users'))
+    if current_user.role != 'superadmin':
+        flash('NOT ALLOWED!', 'error')
+        return redirect(url_for('manage_users'))
     user.role='admin'
     user.active=True
     db.session.commit()
@@ -1388,6 +1426,9 @@ def admin_demote_user(user_id):
         return redirect(url_for('manage_users'))
     if user.role == 'user':
         flash('User already User', 'error')
+        return redirect(url_for('manage_users'))
+    if user.role == 'superadmin':
+        flash('NOT ALLOWED!', 'error')
         return redirect(url_for('manage_users'))
     if user.role == 'banned':
         flash('User was Banned', 'error')
@@ -1792,10 +1833,13 @@ def clear_old_activities():
 @app.route('/admin/activities/clean_hourly/not_allowed')
 @admin_required
 def clear_hourly_logs():
+    if current_user.role != 'superadmin':
+        return render_template("403.html"),  403
+        log_admin_activity("[ADMIN TRY CLEAN] Tried to clean logs > 3hrs")
     actual_time = datetime.utcnow() + timedelta(hours=3)
     cutoff = actual_time - timedelta(hours=3)
     deleted = AdminActivity.query.filter(AdminActivity.timestamp < cutoff).delete()
-    log_admin_activity("[ADMIN CLEAN LOGS] Cleaned old logs <3 hrs>")
+    log_admin_activity("[SUPERADMIN CLEAN LOGS] Cleaned old logs <3 hrs>")
     db.session.commit()
 
     flash(f"Deleted {deleted} logs older than 3 hour.", "success")

@@ -47,7 +47,7 @@
 
         function redirectUser() {
             // Automatically check if the user is an admin
-            const isAdmin = localStorage.getItem("isAdmin") === "true";
+            const isAdmin = localStorage.getItem("is_admin") === "true";
 
             // Redirect accordingly
             window.location.href = isAdmin ? "/admin_dashboard" : "/products";
