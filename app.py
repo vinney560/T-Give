@@ -43,7 +43,7 @@ if not db_url:
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
-app.config['ACTIVITY_RETENTION_DAYS'] = 1
+app.config['ACTIVITY_RETENTION_DAYS'] = 30
 # ===================================================
 #                  >>>> EXTENSIONS INIT <<<<
 # ===================================================
@@ -1710,19 +1710,29 @@ def log_admin_activity(action, target_type=None, target_id=None):
         if not admin_id:
             raise Exception("Admin not authenticated")
 
-        #-----------------------------------------------
+        # Parse User-Agent info
         from user_agents import parse
-        ua_string = request.headers.get('User-Agent', '')
+        ua_string = request.headers.get('User-Agent')
         ua = parse(ua_string)
-        device_info = f"{ua.os.family} ({ua.device.family}) - {ua.browser.family}"
-        #----------------------------------------------
+
+        os_name = ua.os.family
+        os_version = ua.os.version_string
+        browser_name = ua.browser.family
+        browser_version = ua.browser.version_string
+        device_brand = ua.device.brand or "Unknown Brand"
+        device_family = ua.device.family or "Unknown Device"
+        device_model = ua.device.model or ""
+
+        device_info = f"{device_brand} {device_family} {device_model}".strip()
+        user_agent_details = f"{os_name} {os_version} ({device_info}) - {browser_name} {browser_version}"
+
         activity = AdminActivity(
             admin_id=admin_id,
             action=action,
             target_type=target_type,
             target_id=target_id,
             ip_address=request.headers.get('X-Forwarded-For', request.remote_addr),
-            user_agent=device_info
+            user_agent=user_agent_details
         )
 
         db.session.add(activity)
@@ -1776,20 +1786,21 @@ def clear_old_activities():
     db.session.commit()
 
     flash(f"Deleted {deleted} activity logs older than {days} days.", "success")
+    log_admin_activity("[ADMIN CLEAN LOGS] Deleted logs older than 7 days")
     return redirect(url_for('admin_dashboard'))
     
-@app.route('/admin/activities/clean_hourly')
+@app.route('/admin/activities/clean_hourly/not_allowed')
 @admin_required
 def clear_hourly_logs():
-    cutoff = datetime.utcnow() - timedelta(hours=1)
+    actual_time = datetime.utcnow() + timedelta(hours=3)
+    cutoff = actual_time - timedelta(hours=3)
     deleted = AdminActivity.query.filter(AdminActivity.timestamp < cutoff).delete()
-    log_admin_activity("[ADMIN CLEAN LOGS] Cleaned old logs")
+    log_admin_activity("[ADMIN CLEAN LOGS] Cleaned old logs <3 hrs>")
     db.session.commit()
 
-    flash(f"Deleted {deleted} logs older than 1 hour.", "success")
-    return redirect(url_for('admin_dashboard'))    
+    flash(f"Deleted {deleted} logs older than 3 hour.", "success")
+    return redirect(url_for('admin_dashboard'))  
 #---------------------------------------------------
-import pyimgur
 
 CLIENT_ID = "3c32eed857d210b"
 
