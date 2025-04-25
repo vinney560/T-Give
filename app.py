@@ -266,6 +266,14 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def superadmin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.role != 'superadmin':
+            return abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
 @login_manager.user_loader  
 def load_user(user_id):  
     return User.query.get(int(user_id))       
@@ -1400,7 +1408,7 @@ def admin_delete_user(user_id):
 #PROMOTE USER
 @app.route('/admin_promote_user/<int:user_id>', methods=['POST'])
 @limiter.limit("10 per minute")
-@admin_required
+@superadmin_required
 def admin_promote_user(user_id):
     user=User.query.get_or_404(user_id)
     if current_user.id == user.id:
@@ -1413,9 +1421,6 @@ def admin_promote_user(user_id):
     if user.role == 'banned':
         flash('User was Banned', 'error')
         return redirect(url_for('manage_users'))
-    if current_user.role != 'superadmin':
-        flash('NOT ALLOWED!', 'error')
-        return redirect(url_for('manage_users'))
     user.role='admin'
     user.active=True
     db.session.commit()
@@ -1426,7 +1431,7 @@ def admin_promote_user(user_id):
 #DEMOTE ADMIN
 @app.route('/admin_demote_user/<int:user_id>', methods=['POST'])
 @limiter.limit("20 per minute")
-@admin_required
+@superadmin_required
 def admin_demote_user(user_id):
     user=User.query.get_or_404(user_id)
     if current_user.id == user.id:
@@ -1435,9 +1440,6 @@ def admin_demote_user(user_id):
         return redirect(url_for('manage_users'))
     if user.role == 'user':
         flash('User already User', 'error')
-        return redirect(url_for('manage_users'))
-    if user.role == 'superadmin':
-        flash('NOT ALLOWED!', 'error')
         return redirect(url_for('manage_users'))
     if user.role == 'banned':
         flash('User was Banned', 'error')
