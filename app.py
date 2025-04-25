@@ -412,16 +412,15 @@ def register():
             db.session.commit()
         if admin_setting and admin_secret_input == admin_setting.secret:
             role = 'admin'
+        super_admin_setting = SuperAdminSetting.query.first()
+        if not super_admin_setting:
+            new_setting = SuperAdminSetting(super_secret='479superadmin479')
+            db.session.add(new_setting)
+            db.session.commit()
+        if super_admin_setting and admin_secret_input == super_admin_setting.secret:
+            role = 'superadmin'
         else:
-            super_admin_setting = SuperAdminSetting.query.first()
-            if not super_admin_setting:
-                new_setting = SuperAdminSetting(super_secret='479superadmin479')
-                db.session.add(new_setting)
-                db.session.commit()
-            if super_admin_setting and admin_secret_input == super_admin_setting.secret:
-                role = 'superadmin'
-            else:
-                role = 'user'
+            role = 'user'
         hashed_password = generate_password_hash(password)
         new_user = User(mobile=mobile, password=hashed_password, role=role, location=location, email=email, agreed=True)
         db.session.add(new_user)
