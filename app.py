@@ -410,6 +410,8 @@ def register():
             new_setting = AdminSetting(secret='479admin479')
             db.session.add(new_setting)
             db.session.commit()
+            admin_setting = AdminSetting.query.first()
+            
         if admin_setting and admin_secret_input == admin_setting.secret:
             role = 'admin'
         super_admin_setting = SuperAdminSetting.query.first()
@@ -417,6 +419,8 @@ def register():
             new_setting = SuperAdminSetting(super_secret='479superadmin479')
             db.session.add(new_setting)
             db.session.commit()
+            super_admin_setting = SuperAdminSetting.query.first()
+            
         if super_admin_setting and admin_secret_input == super_admin_setting.secret:
             role = 'superadmin'
         else:
