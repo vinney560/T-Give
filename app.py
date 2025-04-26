@@ -349,7 +349,7 @@ def backup_product_to_json(product):
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 #===================================================
-def send_email(subject, recipients, **kwargs):
+def send_order_email(subject, recipients, **kwargs):
     try:
         html_body = render_template('order_email.html', **kwargs)
         msg = Message(
@@ -833,7 +833,7 @@ def place_order():
         session.pop('cart', None)
         
         flash("Order Placed!", "success")
-        send_email(subject="Order Confirmation", recipients=current_user.email, subject_title="Order Confirmation", message_intro="Thank you for your order!", name=product.name, description=product.description, price=product.price, quantity=quantity, image_url=product.image_url, mobile=current_user.mobile)
+        send_order_email("Order Confirmation", current_user.email, subject_title="Order Successful!", message_intro="Thanks for your Purchase!", name=product.name, description=product.description, price=product.price, quantity=quantity, image_url=f"https://t-give-3.onrender.com/uploads/{product.image_url}", mobile=current_user.mobile)
         return render_template('order_confirmation.html', orders=orders)
 
     except IntegrityError as e:
