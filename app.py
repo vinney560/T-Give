@@ -348,20 +348,6 @@ def backup_product_to_json(product):
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 
-#===================================================
-@app.route('/send_test_email')
-def send_test_email():
-    try:
-        msg = Message(
-            subject="Flask Mail Test",
-            recipients=["vincentkipngetich479@gmail.com"],
-            body="Hello Vincent! This is a test email sent from your Flask app using Gmail App Password."
-        )
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        return f"Failed to send email: {str(e)}"
-
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
@@ -1113,6 +1099,20 @@ def about():
     about_info = About.query.first()
     return render_template('about.html', about=about_info)
 
+
+#===================================================
+@app.route('/send_test_email')
+def send_test_email():
+    try:
+        msg = Message(
+            subject="Flask Mail Test",
+            recipients=["vincentkipngetich479@gmail.com"],
+            body="Hello Vincent! This is a test email sent from your Flask app using Gmail App Password."
+        )
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        return f"Failed to send email: {str(e)}"
 #===================================================
 #                       >>>>ADMIN ENDPOINTS<<<<<
 #===================================================
