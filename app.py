@@ -485,7 +485,7 @@ def register():
         
         flash("©️  Welcome! To T-Give", "success")
         login_user(new_user)
-        send_email("Welcome to Our App!", user.email, subject_title="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html')
+        send_email("Welcome to Our App!", new_user.email, subject_title="Registration Successful!", message_intro="Thank you for registering with us!", mobile=new_user.mobile, email=new_user.email, role=new_user.role, agreed=new_user.agreed, active=new_user.active, template='registration_email.html')
         return redirect(url_for('welcome'))
 
     return render_template('register.html')
