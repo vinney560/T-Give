@@ -1,91 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Send Email to Users</title>
-    <style>
-        /* Simple style for the form */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #4CAF50;
-        }
-        .email-list {
-            list-style-type: none;
-            padding: 0;
-        }
-        .email-list li {
-            margin-bottom: 10px;
-        }
-        .email-list input {
-            margin-right: 10px;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Email to Users</title>
+  <style>
+    body {
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #d4fc79, #96e6a1);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      margin: 0;
+      position: relative;
+    }
+
+    /* SVG background */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      background: url('https://www.svgrepo.com/show/354202/abstract-shape.svg') no-repeat center center;
+      background-size: cover;
+      opacity: 0.05;
+      z-index: 0;
+      transform: rotate(15deg);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background: white;
+      padding: 30px;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #10b981;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .email-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .email-list li {
+      background: #f9fafb;
+      padding: 8px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .email-list input[type="checkbox"] {
+      margin-right: 10px;
+      accent-color: #10b981;
+      transform: scale(1.2);
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: #374151;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: #10b981;
+      outline: none;
+      background: #ffffff;
+    }
+
+    textarea {
+      height: 150px;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+      background: linear-gradient(90deg, #34d399, #10b981);
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 14px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Send Email to Users</h1>
-        
-        <form method="POST">
-            <div>
-                <h3>Select Users</h3>
-                <ul class="email-list">
-                    {% for user in users %}
-                        <li>
-                            <input type="checkbox" name="emails" value="{{ user.email }}">
-                            {{ user.email }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
+  <div class="container">
+    <h1>Send Email to Users</h1>
 
-            <div>
-                <label for="subject">Subject</label>
-                <input type="text" name="subject" id="subject" required>
-            </div>
+    <form method="POST">
+      <div>
+        <h3 style="color:#6b7280;margin-bottom:10px;">Select Users</h3>
+        <ul class="email-list">
+          {% for user in users %}
+          <li>
+            <input type="checkbox" name="emails" value="{{ user.email }}">
+            {{ user.email }}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
 
-            <div>
-                <label for="message">Message</label>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <textarea name="message" id="message" required></textarea>
-            </div>
+      <div>
+        <label for="subject">Subject</label>
+        <input type="text" name="subject" id="subject" required>
+      </div>
 
-            <button type="submit">Send Email</button>
-        </form>
-    </div>
+      <div>
+        <label for="message">Message</label>
+        <textarea name="message" id="message" required></textarea>
+      </div>
+
+      <button type="submit">Send Email</button>
+    </form>
+  </div>
 </body>
 </html>
