@@ -789,20 +789,19 @@ def place_order():
     user = User.query.get_or_404(user_id)
     if user.role != 'user':
         return redirect(url_for('non_users'))
+        
     cart = session.get('cart', {})
-
     if not cart:
         flash('Cart is empty', 'error')
         return redirect(url_for('cart'))
-        
-    user = User.query.get_or_404(user_id)
+
     if user.role == 'banned':
         return render_template("banned.html")
-    if user.role != 'user':
-        return render_template('login.html')
 
     try:
         orders = []
+        email_products = []  # << for email, independent
+
         for product_id, quantity in cart.items():
             product = Product.query.get(int(product_id))
             if product:
@@ -811,30 +810,49 @@ def place_order():
                     product_id=product.id,
                     location=current_user.location,
                     quantity=quantity,
-                    total=product.price*quantity,
+                    total=product.price * quantity,
                     status='Pending'
                 )
                 db.session.add(new_order)
+
+                # For Email
+                email_products.append({
+                    'name': product.name,
+                    'description': product.description,
+                    'price': product.price,
+                    'quantity': quantity,
+                    'image_url': product.image_url
+                })
+
+                # For Confirmation page
                 orders.append({
                     'name': product.name,
                     'quantity': quantity,
                     'price': product.price,
                     'total': product.price * quantity
                 })
-        for product_id, quantity in cart.items():
-            product = Product.query.get(int(product_id))
-            if product:
-                product.name=product.name
-                product.description=product.description
-                product.price=product.price
-                product.stock=int(product.stock - quantity)
-                product.image_url=product.image_url
-                  
+
+                # Update stock
+                product.stock = int(product.stock - quantity)
+
         db.session.commit()
         session.pop('cart', None)
         
         flash("Order Placed!", "success")
-        send_order_email("Order Confirmation", current_user.email, subject_title="Order Successful!", message_intro="Thanks for your Purchase!", name=product.name, description=product.description, price=product.price, quantity=quantity, image_url=f"https://t-give-3.onrender.com/uploads/{product.image_url}", mobile=current_user.mobile)
+
+        # Email sending is independent
+        send_order_email(
+            subject="Order Confirmation",
+            recipient=current_user.email,
+            subject_title="Order Successful!",
+            message_intro="Thanks for your Purchase!",
+            mobile=current_user.mobile,
+            email=current_user.email,
+            role=current_user.role,
+            active=current_user.active,
+            products=email_products
+        )
+
         return render_template('order_confirmation.html', orders=orders)
 
     except IntegrityError as e:
