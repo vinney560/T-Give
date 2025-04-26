@@ -510,7 +510,7 @@ def forgot_password():
             return redirect(url_for('login'))
         else:
             flash('Email not found.', 'error')
-            return redirect(url_for('forgot_password'))
+            return redirect(url_for('login'))
 
     return render_template('forgot_password.html')
 
@@ -958,7 +958,7 @@ def update_profile_pic():
     
     if file.filename == '':  
         flash("No selected file!", "error")  
-        return redirect(url_for("account" if current_user.role == 'admin' else "profile"))
+        return redirect(url_for("account" if current_user.role == 'admin' or current_user.role=='superadmin' else "profile"))
 
     if file and allowed_file(file.filename):  
         filename = secure_filename(file.filename)  
@@ -973,7 +973,7 @@ def update_profile_pic():
     else:  
         flash("⚠️ Invalid file type! Only PNG, JPG, JPEG allowed.", "error")
 
-    return redirect(url_for("account" if current_user.role == 'admin' else "profile"))
+    return redirect(url_for("account" if current_user.role == 'admin' or current_user.role=='superadmin' else "profile"))
 
 # LOCATION UPDATE
 @app.route("/update_location", methods=["POST"])
@@ -988,7 +988,7 @@ def update_location():
     else:
         flash("Location cannot be empty!", "error")
 
-    return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))    
+    return redirect(url_for("account" if current_user.role == 'admin' or current_user.role=='superadmin' else 'profile'))    
 
 # EMAIL UPDATE
 @app.route("/update_email", methods=["POST"])
@@ -1006,9 +1006,9 @@ def update_email():
             return render_template('admin_account.html' if current_user.role == 'admin' else 'profile.html')
     else:
         flash('Invalid Email')
-        return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))
+        return redirect(url_for("account" if current_user.role == 'admin' or current_user.role=='superadmin' else 'profile'))
         
-    return redirect(url_for("account" if current_user.role == 'admin' else 'profile'))
+    return redirect(url_for("account" if current_user.role == 'admin' or current_user.role=='superadmin' else 'profile'))
 #---------------------------------------------------
 #              ____ACCOUNT SETTINGS PAGE____
 
