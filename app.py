@@ -539,7 +539,8 @@ def reset_password(token):
 
     if request.method == 'POST':
         new_password = request.form.get('password')
-        user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        hashed_password = generate_password_hash(new_password)
+        user.password = hashed_password
         db.session.commit()
         flash('Your password has been updated.', 'success')
         return redirect(url_for('login'))
