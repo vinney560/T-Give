@@ -351,7 +351,6 @@ def favicon():
 #===================================================
 
 def send_order_email(subject, recipient, subject_title, message_intro, mobile, email, role, active, products):
-    # Calculate the total price for the email
     total_price = sum([item['price'] * item['quantity'] for item in products])
 
     msg = Message(
@@ -359,10 +358,10 @@ def send_order_email(subject, recipient, subject_title, message_intro, mobile, e
         recipients=[recipient],
         html=render_template(
             'order_email.html', 
-            name=current_user.name, 
+            mobile=mobile, 
             total_price=total_price, 
             products=products,
-            shop_url=url_for('home')       # Link to homepage or shop page
+            shop_url=url_for('home')  # Assuming you have a 'home' route
         )
     )
 
