@@ -1106,9 +1106,20 @@ def about():
 def send_test_email():
     try:
         msg = Message(
-            subject="Flask Mail Test",
+            subject="Welcome to Flask Email Testing!",
+            sender=("Vincent Kipngetich", "vinneyjoy1@gmail.com"),
             recipients=["vincentkipngetich479@gmail.com"],
-            body="Hello Vincent! This is a test email sent from your Flask app using Gmail App Password."
+            html="""
+            <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2 style="color: #4CAF50;">Hello Vincent!</h2>
+                <p>We are excited to let you know that your Flask email setup is working successfully.</p>
+                <p style="margin-top: 20px;">Thank you for testing with us.</p>
+                <br>
+                <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
+            </body>
+            </html>
+            """
         )
         mail.send(msg)
         return "Email sent successfully!"
