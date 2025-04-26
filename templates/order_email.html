@@ -1,0 +1,21 @@
+<!-- templates/order_email.html -->
+<html>
+  <body style="font-family: Arial; padding: 20px;">
+    <h2 style="color: #4CAF50;">{{ subject_title }}</h2>
+    <p>{{ message_intro }}</p>
+
+    {% if name %}
+    <h3>Product Details:</h3>
+    <p><b>Name:</b> {{ name }}</p>
+    <p><b>Description:</b> {{ description }}</p>
+    <p><b>Price:</b> Ksh {{ price }}</p>
+    <p><b>Quantity:</b> {{ quantity }}</p>
+    <img src="{{ image_url }}" alt="Product Image" width="150" style="margin-top: 10px;">
+    <br><br>
+    {% endif %}
+
+    <p><b>Mobile:</b> {{ mobile }}</p>
+    <br>
+    <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
+  </body>
+</html>

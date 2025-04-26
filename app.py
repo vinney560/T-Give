@@ -349,51 +349,18 @@ def backup_product_to_json(product):
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 #===================================================
-def send_order_email(user_email, user_mobile, orders_list):
+def send_email(subject, recipients, **kwargs):
     try:
-        order_items_html = ""
-        for item in orders_list:
-            order_items_html += f"""
-            <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px;">
-                <img src="{item['image_url']}" alt="Product Image" width="100" style="border-radius: 5px;">
-                <p><b>Name:</b> {item['name']}</p>
-                <p><b>Description:</b> {item['description']}</p>
-                <p><b>Price:</b> Ksh {item['price']}</p>
-                <p><b>Quantity:</b> {item['quantity']}</p>
-                <p><b>Total:</b> Ksh {item['total']}</p>
-            </div>
-            """
-
-        html = f"""
-        <html>
-        <body style="font-family: Arial; padding: 20px;">
-            <h2 style="color: #4CAF50;">Order Confirmation</h2>
-            <p>Thank you for your order!</p>
-
-            <h3>Order Details:</h3>
-            {order_items_html}
-
-            <h3>Your Contact:</h3>
-            <p><b>Email:</b> {user_email}</p>
-            <p><b>Mobile:</b> {user_mobile}</p>
-
-            <p style="margin-top: 20px;">We’ll process your order soon!</p>
-            <br>
-            <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
-        </body>
-        </html>
-        """
-
+        html_body = render_template('order_email.html', **kwargs)
         msg = Message(
-            subject="Order Placed Successfully!",
-            recipients=[user_email],
-            html=html
+            subject=subject,
+            recipients=[recipients],
+            html=html_body
         )
         mail.send(msg)
-        print(f"Order email sent to {user_email}")
         return True
     except Exception as e:
-        print(f"Error sending order email: {e}")
+        print(f"Email send error: {e}")
         return False
 #===================================================    
 #---------------------------------------------------
@@ -803,7 +770,7 @@ def place_order():
         session.pop('cart', None)
         
         flash("Order Placed!", "success")
-        send_order_email(current_user.email, current_user.mobile, orders)
+        send_email(subject="Order Confirmation", recipients=current_user.email, subject_title="Order Confirmation", message_intro="Thank you for your order!", name=product.name, description=product.description, price=product.price, quantity=quantity, image_url=product.image_url, mobile=current_user.mobile)
         return render_template('order_confirmation.html', orders=orders)
 
     except IntegrityError as e:
