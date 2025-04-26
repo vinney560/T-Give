@@ -857,6 +857,7 @@ def place_order():
                 subject_title="Order Successful!",
                 message_intro="Thanks for your Purchase!",
                 mobile=current_user.mobile,
+                name=current_user.mobile,
                 email=current_user.email,
                 role=current_user.role,
                 active=current_user.active,
