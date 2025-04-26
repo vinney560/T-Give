@@ -44,11 +44,21 @@ app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
 app.config['ACTIVITY_RETENTION_DAYS'] = 30
+
+app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+app.config['MAIL_PORT'] = int(os.getenv("MAIL_PORT"))
+app.config['MAIL_USE_TLS'] = os.getenv("MAIL_USE_TLS") == 'True'
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
+
 # ===================================================
 #                  >>>> EXTENSIONS INIT <<<<
 # ===================================================
 
 db = SQLAlchemy(app)
+
+mail = Mail(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -337,6 +347,20 @@ def backup_product_to_json(product):
 @app.route('/favicon.ico')
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
+
+#===================================================
+@app.route('/send_test_email')
+def send_test_email():
+    try:
+        msg = Message(
+            subject="Flask Mail Test",
+            recipients=["vincentkipngetich479@gmail.com"],
+            body="Hello Vincent! This is a test email sent from your Flask app using Gmail App Password."
+        )
+        mail.send(msg)
+        return "Email sent successfully!"
+    except Exception as e:
+        return f"Failed to send email: {str(e)}"
 
 #---------------------------------------------------
 def format_mobile(mobile):
