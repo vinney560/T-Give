@@ -348,7 +348,41 @@ def backup_product_to_json(product):
 @app.route('/favicon.ico')
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
+#===================================================
+def send_order_email(user_email, user_mobile, order_id, product_name, product_description, product_image_url, quantity):
+    try:
+        html = f"""
+        <html>
+        <body style="font-family: Arial; padding: 20px;">
+            <h2 style="color: #2196F3;">Hello!</h2>
+            <p>Your order <b>#{order_id}</b> has been placed successfully.</p>
+            <p>We have registered your mobile number: <b>{user_mobile}</b>.</p>
 
+            <h3>Product Details:</h3>
+            <p><b>{product_name}</b></p>
+            <img src="{product_image_url}" alt="Product Image" style="width: 200px; height: auto; border-radius: 8px; margin-top: 10px;">
+            <p><b>Description:</b> {product_description}</p>
+            <p><b>Quantity:</b> {quantity}</p>
+
+            <p style="margin-top: 20px;">We will notify you once the order is shipped.</p>
+            <br>
+            <p style="font-size: 14px; color: gray;">Thank you for shopping with us!</p>
+        </body>
+        </html>
+        """
+
+        msg = Message(
+            subject="Order Confirmation",
+            recipients=[user_email],
+            html=html
+        )
+        mail.send(msg)
+        print(f"Order email sent to {user_email}")
+        return True
+    except Exception as e:
+        print(f"Error sending order email: {e}")
+        return False
+#===================================================    
 #---------------------------------------------------
 def format_mobile(mobile):
     """Ensure mobile is stored as 07XXXXXXXX format."""
@@ -756,6 +790,7 @@ def place_order():
         session.pop('cart', None)
         
         flash("Order Placed!", "success")
+        send_order_email(current_user.email, current_user.mobile, new_order.id, product.name, product.description, product.image_url, cart_item.quantity)
         return render_template('order_confirmation.html', orders=orders)
 
     except IntegrityError as e:
@@ -1100,31 +1135,6 @@ def about():
     about_info = About.query.first()
     return render_template('about.html', about=about_info)
 
-
-#===================================================
-@app.route('/send_test_email')
-def send_test_email():
-    try:
-        msg = Message(
-            subject="Welcome to Flask Email Testing!",
-            sender=("Vincent Kipngetich", "vinneyjoy1@gmail.com"),
-            recipients=["vincentkipngetich479@gmail.com"],
-            html="""
-            <html>
-            <body style="font-family: Arial, sans-serif; padding: 20px;">
-                <h2 style="color: #4CAF50;">Hello Vincent!</h2>
-                <p>We are excited to let you know that your Flask email setup is working successfully.</p>
-                <p style="margin-top: 20px;">Thank you for testing with us.</p>
-                <br>
-                <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
-            </body>
-            </html>
-            """
-        )
-        mail.send(msg)
-        return "Email sent successfully!"
-    except Exception as e:
-        return f"Failed to send email: {str(e)}"
 #===================================================
 #                       >>>>ADMIN ENDPOINTS<<<<<
 #===================================================
