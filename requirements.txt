@@ -20,3 +20,4 @@ pyimgur
 psycopg2-binary>=2.9
 pg8000
 user_agents
+Flask-Mail==0.9.1
