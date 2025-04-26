@@ -370,11 +370,6 @@ def send_order_email(subject, recipient, subject_title, message_intro, mobile, e
     except Exception as e:
         print(f"Error sending email: {e}")
 
-from flask import render_template, request, redirect, url_for, flash
-from flask_mail import Message
-from app import mail, db
-from models import User  # Assuming User model is defined
-
 @app.route('/admin/send_email', methods=['GET', 'POST'])
 @login_required
 @admin_required
