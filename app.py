@@ -484,7 +484,54 @@ def welcome():
 #===================================================
 #               >>>> USERS ENDPOINTS <<<<
 #===================================================
+from itsdangerous import URLSafeTimedSerializer
 
+# Serializer for token generation
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        if user:
+            send_reset_email(user)
+            flash('Password reset email sent!', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('Email not found.', 'error')
+            return redirect(url_for('forgot_password'))
+
+    return render_template('forgot_password.html')
+
+def send_reset_email(user):
+    token = create_reset_token(user)
+    reset_link = url_for('reset_password', token=token, _external=True)
+
+    msg = Message(
+        subject="Password Reset Request",
+        recipients=[user.email],
+    )
+    msg.html = render_template('forgot_password_email.html', reset_link=reset_link)
+    mail.send(msg)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    user = verify_reset_token(token)
+    if not user:
+        flash('Invalid or expired token.', 'error')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('password')
+        user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        db.session.commit()
+        flash('Your password has been updated.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
+#===================================================
 @app.route("/home")
 @csrf.exempt
 def home(): 
