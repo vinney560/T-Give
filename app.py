@@ -843,7 +843,7 @@ def place_order():
         # Email sending is independent
         send_order_email(
             subject="Order Confirmation",
-            recipient=current_user.email,
+            recipients=current_user.email,
             subject_title="Order Successful!",
             message_intro="Thanks for your Purchase!",
             mobile=current_user.mobile,
