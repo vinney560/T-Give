@@ -362,6 +362,21 @@ def send_order_email(subject, recipients, **kwargs):
     except Exception as e:
         print(f"Email send error: {e}")
         return False
+
+def send_email(subject, recipients, template='order_email.html', **kwargs):
+    try:
+        html_body = render_template(template, **kwargs)
+        msg = Message(
+            subject=subject,
+            recipients=[recipients],
+            html=html_body
+        )
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(f"Email send error: {e}")
+        return False
+
 #===================================================    
 #---------------------------------------------------
 def format_mobile(mobile):
@@ -470,8 +485,7 @@ def register():
         
         flash("©️  Welcome! To T-Give", "success")
         login_user(new_user)
-        #if user.role == 'admin':
-#            log_admin_activity(f"[ADMIN REGISTER] User: {user.mobile} registered as Admin", 'user', user.id)
+        send_email("Welcome to Our App!", user.email, subject_title="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html')
         return redirect(url_for('welcome'))
 
     return render_template('register.html')

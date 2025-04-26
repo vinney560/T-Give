@@ -1,0 +1,21 @@
+<!-- templates/registration_email.html -->
+<html>
+  <body style="font-family: Arial, sans-serif; padding: 20px;">
+    <h2 style="color: #2196F3;">{{ subject_title }}</h2>
+
+    <p>{{ message_intro }}</p>
+
+    <h3>Account Details:</h3>
+    <p><b>Mobile:</b> {{ mobile }}</p>
+    <p><b>Email:</b> {{ email }}</p>
+    <p><b>Role:</b> {{ role }}</p>
+    <p><b>Agreed Terms:</b> {{ 'Yes' if agreed else 'No' }}</p>
+    <p><b>Active Account:</b> {{ 'Yes' if active else 'No' }}</p>
+
+    <br>
+    <p style="font-size: 14px; color: gray;">
+      Welcome aboard!<br>
+      Flask App Team
+    </p>
+  </body>
+</html>
