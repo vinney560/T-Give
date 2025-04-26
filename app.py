@@ -349,21 +349,8 @@ def backup_product_to_json(product):
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 #===================================================
-def send_order_email(subject, recipients, **kwargs):
-    try:
-        html_body = render_template('order_email.html', **kwargs)
-        msg = Message(
-            subject=subject,
-            recipients=[recipients],
-            html=html_body
-        )
-        mail.send(msg)
-        return True
-    except Exception as e:
-        print(f"Email send error: {e}")
-        return False
 
-def send_email(subject, recipients, template='order_email.html', **kwargs):
+def send_order_email(subject, recipients, template='order_email.html', **kwargs):
     try:
         html_body = render_template(template, **kwargs)
         msg = Message(
