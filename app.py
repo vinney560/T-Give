@@ -370,6 +370,46 @@ def send_order_email(subject, recipient, subject_title, message_intro, mobile, e
     except Exception as e:
         print(f"Error sending email: {e}")
 
+from flask import render_template, request, redirect, url_for, flash
+from flask_mail import Message
+from app import mail, db
+from models import User  # Assuming User model is defined
+
+@app.route('/admin/send_email', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def send_email():
+
+    users = User.query.all()  # Fetch all users from the database
+    if request.method == 'POST':
+        selected_emails = request.form.getlist('emails')  # Get selected emails
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+
+        # Send email to each selected user
+        for email in selected_emails:
+            send_email_to_user(subject, email, message)
+
+        flash('Emails sent successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))  # Redirect after sending email
+
+    return render_template('send_email.html', users=users)
+
+def send_email_to_user(subject, recipient, message):
+    msg = Message(
+        subject=subject,
+        recipients=[recipient],
+        html=render_template(
+            'email_template.html',  # Email HTML template (designed)
+            message=message,
+            email=recipient
+        )
+    )
+    try:
+        mail.send(msg)  # Send the email using Flask-Mail
+    except Exception as e:
+        print(f"Error sending email: {e}")
+
 #===================================================    
 #---------------------------------------------------
 def format_mobile(mobile):

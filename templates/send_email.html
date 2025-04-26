@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Email to Users</title>
+    <style>
+        /* Simple style for the form */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        .email-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .email-list li {
+            margin-bottom: 10px;
+        }
+        .email-list input {
+            margin-right: 10px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Send Email to Users</h1>
+        
+        <form method="POST">
+            <div>
+                <h3>Select Users</h3>
+                <ul class="email-list">
+                    {% for user in users %}
+                        <li>
+                            <input type="checkbox" name="emails" value="{{ user.email }}">
+                            {{ user.email }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div>
+                <label for="subject">Subject</label>
+                <input type="text" name="subject" id="subject" required>
+            </div>
+
+            <div>
+                <label for="message">Message</label>
+                <textarea name="message" id="message" required></textarea>
+            </div>
+
+            <button type="submit">Send Email</button>
+        </form>
+    </div>
+</body>
+</html>
