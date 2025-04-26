@@ -349,30 +349,43 @@ def backup_product_to_json(product):
 def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 #===================================================
-def send_order_email(user_email, user_mobile, order_id, product_name, product_description, product_image_url, quantity):
+def send_order_email(user_email, user_mobile, orders_list):
     try:
+        order_items_html = ""
+        for item in orders_list:
+            order_items_html += f"""
+            <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px;">
+                <img src="{item['image_url']}" alt="Product Image" width="100" style="border-radius: 5px;">
+                <p><b>Name:</b> {item['name']}</p>
+                <p><b>Description:</b> {item['description']}</p>
+                <p><b>Price:</b> Ksh {item['price']}</p>
+                <p><b>Quantity:</b> {item['quantity']}</p>
+                <p><b>Total:</b> Ksh {item['total']}</p>
+            </div>
+            """
+
         html = f"""
         <html>
         <body style="font-family: Arial; padding: 20px;">
-            <h2 style="color: #2196F3;">Hello!</h2>
-            <p>Your order <b>#{order_id}</b> has been placed successfully.</p>
-            <p>We have registered your mobile number: <b>{user_mobile}</b>.</p>
+            <h2 style="color: #4CAF50;">Order Confirmation</h2>
+            <p>Thank you for your order!</p>
 
-            <h3>Product Details:</h3>
-            <p><b>{product_name}</b></p>
-            <img src="{product_image_url}" alt="Product Image" style="width: 200px; height: auto; border-radius: 8px; margin-top: 10px;">
-            <p><b>Description:</b> {product_description}</p>
-            <p><b>Quantity:</b> {quantity}</p>
+            <h3>Order Details:</h3>
+            {order_items_html}
 
-            <p style="margin-top: 20px;">We will notify you once the order is shipped.</p>
+            <h3>Your Contact:</h3>
+            <p><b>Email:</b> {user_email}</p>
+            <p><b>Mobile:</b> {user_mobile}</p>
+
+            <p style="margin-top: 20px;">We’ll process your order soon!</p>
             <br>
-            <p style="font-size: 14px; color: gray;">Thank you for shopping with us!</p>
+            <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
         </body>
         </html>
         """
 
         msg = Message(
-            subject="Order Confirmation",
+            subject="Order Placed Successfully!",
             recipients=[user_email],
             html=html
         )
@@ -790,7 +803,7 @@ def place_order():
         session.pop('cart', None)
         
         flash("Order Placed!", "success")
-        send_order_email(current_user.email, current_user.mobile, new_order.id, product.name, product.description, product.image_url, cart_item.quantity)
+        send_order_email(current_user.email, current_user.mobile, orders)
         return render_template('order_confirmation.html', orders=orders)
 
     except IntegrityError as e:
