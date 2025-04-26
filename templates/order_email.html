@@ -12,7 +12,9 @@
       <p><b>Quantity:</b> {{ quantity }}</p>
 
       {% if image_url %}
-        <img src="{{ image_url }}" alt="Product Image" width="150" style="margin-top: 10px;">
+        <img src="{{ product.image_url }}"
+       onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
+       alt="{{ product.name }}" class="product-image" width="150" style="margin-top: 10px;">
       {% endif %}
       <br><br>
     {% endif %}
