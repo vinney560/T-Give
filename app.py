@@ -19,6 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 from functools import wraps
 from flask import abort
+from flask_mail import Mail, Message
 import os
 import pg8000
 import re
