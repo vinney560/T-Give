@@ -1310,21 +1310,40 @@ def super_admin_settings():
 @superadmin_required
 def admin_secret():
     admin_setting = AdminSetting.query.first()
-    
-    if request.method == 'POST':
-        new_secret = request.form.get('current_secret')
-        if admin_setting:
-            admin_setting.secret = new_secret
-        else:
-            admin_setting = AdminSetting(secret=new_secret)
-            db.session.add(admin_setting)
 
+    if request.method == 'POST':
+        current_secret = request.form.get('current_secret')
+        new_secret = request.form.get('new_secret')
+
+        if not admin_setting:
+            flash("Admin setting not initialized.", "error")
+            return redirect(url_for('admin_secret'))
+
+        stored_secret = admin_setting.secret
+        is_hashed = stored_secret.startswith('pbkdf2:')
+
+        # Check if the current secret matches
+        valid = check_password_hash(stored_secret, current_secret) if is_hashed else current_secret == stored_secret
+
+        if not valid:
+            flash("Incorrect current admin secret.", "error")
+            return redirect(url_for('admin_secret'))
+
+        if not new_secret or len(new_secret.strip()) < 6:
+            flash("New secret must be at least 6 characters.", "error")
+            return redirect(url_for('admin_secret'))
+
+        # Always hash the new secret
+        admin_setting.secret = generate_password_hash(new_secret.strip())
         db.session.commit()
-        log_admin_activity(f"[ADMIN UPDATE ADMIN_SECRET] Updated admin secret", 'system')
+
+        log_admin_activity("[SUPERADMIN] Updated Admin secret", 'system')
         flash("Admin secret updated successfully!", "success")
         return redirect(url_for('admin_secret'))
-    
-    return render_template('admin_settings.html', admin_secret=admin_setting.secret if admin_setting else '')
+
+    return render_template('admin_settings.html')
+
+from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route('/super_admin_secret', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -1337,11 +1356,16 @@ def super_admin_secret():
         new_secret = request.form.get('new_secret')
 
         if not super_admin_setting:
-            flash("Super admin settings not initialized.", "error")
+            flash("Super admin setting not initialized.", "error")
             return redirect(url_for('super_admin_secret'))
 
-        # Check if current secret matches
-        if current_secret != super_admin_setting.super_secret:
+        stored_secret = super_admin_setting.super_secret
+        is_hashed = stored_secret.startswith('pbkdf2:')
+
+        # Validate current secret
+        valid = check_password_hash(stored_secret, current_secret) if is_hashed else current_secret == stored_secret
+
+        if not valid:
             flash("Incorrect current super admin secret.", "error")
             return redirect(url_for('super_admin_secret'))
 
@@ -1349,11 +1373,12 @@ def super_admin_secret():
             flash("New secret must be at least 6 characters.", "error")
             return redirect(url_for('super_admin_secret'))
 
-        # Update the secret
-        super_admin_setting.super_secret = new_secret.strip()
+        # Save hashed secret
+        super_admin_setting.super_secret = generate_password_hash(new_secret.strip())
         db.session.commit()
 
-        flash("Super Admin secret updated!", "success")
+        log_admin_activity("[SUPERADMIN] Updated Super Admin secret", 'system')
+        flash("Super Admin secret updated successfully!", "success")
         return redirect(url_for('super_admin_secret'))
 
     return render_template('super_admin_settings.html')
