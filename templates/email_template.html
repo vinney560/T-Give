@@ -1,11 +1,53 @@
 <!DOCTYPE html>
-<html>
-<head><title>Message from Admin</title></head>
-<body style="font-family:sans-serif;background:#f4f4f4;padding:20px;">
-    <div style="background:white;padding:20px;border-radius:10px;">
-        <h2>Hello {{ email }},</h2>
-        <p>{{ message }}</p>
-        <p style="margin-top:30px;color:gray;">From your friends at T-Give Nexus!</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Message from Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #f1f8e9);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #00acc1;
+        }
+        p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 13px;
+        }
+        .footer a {
+            color: #00acc1;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Hello {{ email }},</h2>
+    <p>{{ message }}</p>
+
+    <div class="footer">
+        &copy; 2025 <a href="https://t-give-3.onrender.com/home">T-Give Nexus</a>. All rights reserved.
     </div>
+</div>
+
 </body>
 </html>
