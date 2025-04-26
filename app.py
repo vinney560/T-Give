@@ -350,19 +350,26 @@ def favicon():
     return redirect(url_for('uploaded_file', filename='favicon.ico'))
 #===================================================
 
-def send_order_email(subject, recipients, template='order_email.html', **kwargs):
-    try:
-        html_body = render_template(template, **kwargs)
-        msg = Message(
-            subject=subject,
-            recipients=[recipients],
-            html=html_body
+def send_order_email(subject, recipient, subject_title, message_intro, mobile, email, role, active, products):
+    # Calculate the total price for the email
+    total_price = sum([item['price'] * item['quantity'] for item in products])
+
+    msg = Message(
+        subject=subject,
+        recipients=[recipient],
+        html=render_template(
+            'order_email.html', 
+            name=current_user.name, 
+            total_price=total_price, 
+            products=products,
+            shop_url=url_for('home')       # Link to homepage or shop page
         )
+    )
+
+    try:
         mail.send(msg)
-        return True
     except Exception as e:
-        print(f"Email send error: {e}")
-        return False
+        print(f"Error sending email: {e}")
 
 #===================================================    
 #---------------------------------------------------
@@ -787,9 +794,10 @@ def thank_you():
 def place_order():
     user_id = current_user.id
     user = User.query.get_or_404(user_id)
+
     if user.role != 'user':
         return redirect(url_for('non_users'))
-        
+
     cart = session.get('cart', {})
     if not cart:
         flash('Cart is empty', 'error')
@@ -802,9 +810,10 @@ def place_order():
         orders = []
         email_products = []  # << for email, independent
 
+        # For each product in the cart, process it
         for product_id, quantity in cart.items():
             product = Product.query.get(int(product_id))
-            if product:
+            if product and product.stock >= quantity:  # Check if stock is sufficient
                 new_order = Order(
                     user_id=user_id,
                     product_id=product.id,
@@ -832,26 +841,30 @@ def place_order():
                     'total': product.price * quantity
                 })
 
-                # Update stock
+                # Update stock before committing
                 product.stock = int(product.stock - quantity)
 
         db.session.commit()
         session.pop('cart', None)
-        
+
         flash("Order Placed!", "success")
 
-        # Email sending is independent
-        send_order_email(
-            subject="Order Confirmation",
-            recipients=current_user.email,
-            subject_title="Order Successful!",
-            message_intro="Thanks for your Purchase!",
-            mobile=current_user.mobile,
-            email=current_user.email,
-            role=current_user.role,
-            active=current_user.active,
-            products=email_products
-        )
+        # Sending email independently
+        try:
+            send_order_email(
+                subject="Order Confirmation",
+                recipient=current_user.email,
+                subject_title="Order Successful!",
+                message_intro="Thanks for your Purchase!",
+                mobile=current_user.mobile,
+                email=current_user.email,
+                role=current_user.role,
+                active=current_user.active,
+                products=email_products
+            )
+        except Exception as e:
+            print("Error sending email:", e)
+            flash("Your order was placed, but there was an issue sending the confirmation email.", "warning")
 
         return render_template('order_confirmation.html', orders=orders)
 

@@ -1,27 +1,159 @@
-<!-- templates/order_email.html -->
-<html>
-  <body style="font-family: Arial; padding: 20px;">
-    <h2 style="color: #4CAF50;">{{ subject_title }}</h2>
-    <p>{{ message_intro }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
 
-    {% if name %}
-      <h3>Product Details:</h3>
-      <p><b>Name:</b> {{ name }}</p>
-      <p><b>Description:</b> {{ description }}</p>
-      <p><b>Price:</b> Ksh {{ price }}</p>
-      <p><b>Quantity:</b> {{ quantity }}</p>
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-      {% if image_url %}
-        <img src="{{ product.image_url }}"
-       onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
-       alt="{{ product.name }}" class="product-image" width="150" style="margin-top: 10px;">
-      {% endif %}
-      <br><br>
-    {% endif %}
+        .header {
+            text-align: center;
+            background: #00bcd4;
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+        }
 
-    <p><b>Mobile:</b> {{ mobile }}</p>
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
 
-    <br><br>
-    <p style="font-size: 14px; color: gray;">Regards,<br>Flask App Bot</p>
-  </body>
+        .content {
+            padding: 20px;
+        }
+
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .order-summary {
+            background: #f1f1f1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-summary h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #00bcd4;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .order-details {
+            flex: 1;
+            margin-left: 10px;
+        }
+
+        .order-details h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .order-details p {
+            font-size: 14px;
+            color: #777;
+        }
+
+        .order-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4caf50;
+            text-align: right;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+
+        .footer a {
+            color: #00bcd4;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <div class="header">
+            <h1>Order Confirmation</h1>
+        </div>
+
+        <div class="content">
+            <p>Hi {{ name }},</p>
+            <p>Thank you for your purchase! Your order has been successfully placed and is now being processed. Below is the summary of your order:</p>
+
+            <div class="order-summary">
+                <h2>Order Summary</h2>
+
+                {% for item in products %}
+                <div class="order-item">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    <div class="order-details">
+                        <h3>{{ item.name }}</h3>
+                        <p>{{ item.description }}</p>
+                        <p>Price: Ksh {{ item.price }}</p>
+                        <p>Quantity: {{ item.quantity }}</p>
+                    </div>
+                    <div class="order-total">
+                        Ksh {{ item.price * item.quantity }}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="order-total">
+                    <strong>Total: Ksh {{ total_price }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 Your E-commerce Shop. All Rights Reserved.</p>
+            <p>Visit our <a href="https://github.com/vinney560/T-Give/home">website</a> for more amazing products.</p>
+        </div>
+    </div>
+
+</body>
 </html>
