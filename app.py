@@ -520,6 +520,7 @@ def send_reset_email(user):
 
     msg = Message(
         subject="Password Reset Request",
+        sender=("T-Give-3 Nexus", "vinneyjoy1@gmail.com"),
         recipients=[user.email],
     )
     msg.html = render_template('forgot_password_email.html', reset_link=reset_link)
