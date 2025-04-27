@@ -581,7 +581,7 @@ def verify_registration(token):
     user.email_verified=True
     db.session.commit()
     login_user(user)
-    send_email("Welcome to Our App!", user.email, subject_title="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html') 
+    send_email("Welcome to Our App!", user.email, subject="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html') 
     flash('Email verified! Welcome to T-Give Nexus.', 'success')
     return redirect(url_for('welcome'))
         
