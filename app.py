@@ -2255,13 +2255,15 @@ def forbidden_error(error):
 @app.errorhandler(500)
 @csrf.exempt
 def internal_error(error):
-    return render_template('500.html'), 500
+    app.logger.error(f'Internal Server Error: {error}', exc_info=True)
+    flash('Request cannot be completed', 'error'), 500
+    return redirect(request.referrer or url_for('home'))
 
 @app.errorhandler(CSRFError)
 @csrf.exempt
 def handle_csrf_error(e):
     flash("csrf missing", "error"), 400
-    return render_template('csrf_error.html', reason=e)
+    return redirect(request.referrer or url_for('home'))
 
 #---------------------------------------------------
 #                ____RUNNING THE APP____
