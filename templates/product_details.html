@@ -5,10 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} - T-Give Nexus</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+        }
+        .toast {
+            min-width: 150px;
+            max-width: 90%;
+            padding: 12px 25px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.exit {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .toast.success {
+            background: #2ecc71;
+            border-left: 5px solid #27ae60;
+        }
+        .toast.error {
+            background: #e74c3c;
+            border-left: 5px solid #c0392b;
+        }
+        .toast.success::before {
+            content: '✓';
+            font-size: 1.2em;
+        }
+        .toast.error::before {
+            content: '✕';
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 <body class="h-full bg-gradient-to-br from-gray-900 to-gray-800">
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-2 w-full max-w-xs"></div>
+    <div id="toast-container" class="toast-container"></div>
 
     <main class="h-full flex flex-col md:flex-row gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Left Container - Visual Section -->
@@ -148,21 +200,24 @@
         function showToast(message, success = true) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `p-4 rounded-lg shadow-md flex items-center gap-3 ${
-                success ? 'bg-green-500/90' : 'bg-red-500/90'
-            } animate-fade-in`;
+            const typeClass = success ? 'success' : 'error';
             
-            toast.innerHTML = `
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${
-                        success ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'
-                    }"/>
-                </svg>
-                <span>${message}</span>
-            `;
+            toast.className = `toast ${typeClass}`;
+            toast.textContent = message;
 
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            container.prepend(toast);
+            
+            // Trigger reflow to enable transition
+            void toast.offsetHeight;
+            
+            // Add show class
+            toast.classList.add('show');
+
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('exit');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         // Cart System
