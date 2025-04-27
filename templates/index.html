@@ -29,7 +29,7 @@
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                <div class="px-6 py-3 bg-gray-800/90 backdrop-blur-lg rounded-lg border border-cyan-500/30 text-cyan-300 flex items-center gap-2 animate-float">
+                <div class="px-6 py-3 bg-blue-800/90 backdrop-blur-lg rounded-lg border border-cyan-500/30 text-cyan-300 flex items-center gap-2 animate-float">
                     <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -172,7 +172,7 @@
                 document.querySelectorAll('[class*="animate-float"]').forEach(el => {
                     el.remove();
                 });
-            }, 4000);
+            }, 3000);
         });
     </script>
 </body>
