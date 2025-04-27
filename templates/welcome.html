@@ -46,17 +46,17 @@
         }
 
         function redirectUser() {
-            // Automatically check if the user is an admin
-            const isAdmin = localStorage.getItem("is_admin") === "true";
+            const userRole = "{{ role }}"; 
 
-            // Redirect accordingly
-            window.location.href = isAdmin ? "/admin_dashboard" : "/products";
+            if (userRole === "admin" || userRole === "superadmin") {
+                window.location.href = "/admin_dashboard";
+            } else {
+                window.location.href = "/products";
+            }
         }
 
         window.onload = function () {
             speakMessage();
-
-            // Ensure automatic redirection after the animation finishes
             setTimeout(redirectUser, 4500);
         };
     </script>

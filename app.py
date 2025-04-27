@@ -27,6 +27,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask import send_file
 import zipfile
 import io
+from itsdangerous import URLSafeTimedSerializer
 import json
 import pyimgur
 from dotenv import load_dotenv
@@ -467,13 +468,14 @@ def login():
 def register():
     if request.method == 'POST':
         mbl = request.form['mobile']
-        mobile = format_mobile(request.form['mobile'])
+        mobile = format_mobile(mbl)
         password = request.form['password']
         confirm_password = request.form['confirm_password']
         location = request.form['location']
         email = request.form['email']
         admin_secret_input = request.form.get('admin_secret')
 
+        # Validation checks
         if password != confirm_password:
             flash("Passwords do not match.", "error")
             return render_template('register.html', mobile=mbl, password=password, confirm_password=confirm_password, location=location, email=email)
@@ -484,48 +486,99 @@ def register():
 
         if User.query.filter_by(email=email).first():
             flash("Email already exists.", "error")
-            return render_template("register.html", mobile=mbl, location=location,  email=email,  password=password,  confirm_password=confirm_password)
-        if email.endswith('@gmail.com') or email.endswith('@yahoo.com'):
-            pass
-        else:
-            flash('Invalid Email Address')
-            return render_template('register.html', mobile=mbl, location=location,  email=email,  password=password,  confirm_password=confirm_password)
-                        
+            return render_template('register.html', mobile=mbl, location=location, email=email)
+
+        if not (email.endswith('@gmail.com') or email.endswith('@yahoo.com')):
+            flash('Invalid Email Address.', 'error')
+            return render_template('register.html', mobile=mbl, location=location, email=email)
+
         if not location:
-            flash("Location is needed", "error")
+            flash("Location is needed.", "error")
             return render_template('register.html', mobile=mbl, password=password, confirm_password=confirm_password, email=email)
 
+        # Determine role
         admin_setting = AdminSetting.query.first()
         if not admin_setting:
             new_setting = AdminSetting(secret='479admin479')
             db.session.add(new_setting)
             db.session.commit()
             admin_setting = AdminSetting.query.first()
-            
+
         if admin_setting and admin_secret_input == admin_setting.secret:
             role = 'admin'
+        else:
+            role = 'user'
+
         super_admin_setting = SuperAdminSetting.query.first()
         if not super_admin_setting:
             new_setting = SuperAdminSetting(super_secret='479superadmin479')
             db.session.add(new_setting)
             db.session.commit()
             super_admin_setting = SuperAdminSetting.query.first()
-            
+
         if super_admin_setting and admin_secret_input == super_admin_setting.super_secret:
             role = 'superadmin'
-        else:
-            role = 'user'
+
+        # Create new user
         hashed_password = generate_password_hash(password)
         new_user = User(mobile=mobile, password=hashed_password, role=role, location=location, email=email, agreed=True)
         db.session.add(new_user)
         db.session.commit()
-        
-        flash("©️  Welcome! To T-Give", "success")
-        login_user(new_user)
-        send_email("Welcome to Our App!", new_user.email, subject_title="Registration Successful!", message_intro="Thank you for registering with us!", mobile=new_user.mobile, email=new_user.email, role=new_user.role, agreed=new_user.agreed, active=new_user.active, template='registration_email.html')
-        return redirect(url_for('welcome'))
+
+        # Send email verification
+        send_verification_email(new_user)
+
+        flash("✅ Registration successful! Please check your email to verify.", "success")
+        return redirect(url_for('login'))
 
     return render_template('register.html')
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+def generate_email_token(user):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(user.email, salt='email-verification')
+
+def verify_email_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(token, salt='email-verification', max_age=expiration)
+    except Exception:
+        return None
+    return email
+
+def send_verification_email(user):
+    token = generate_email_token(user)
+    verify_link = url_for('verify_registration', token=token, _external=True)
+
+    msg = Message(
+        subject="Verify your T-Give Nexus account",
+        recipients=[user.email]
+    )
+    msg.html = render_template('verify_email_template.html', verify_link=verify_link)
+
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print(f"Failed to send verification email: {e}")
+
+@app.route('/verify_registration/<token>')
+def verify_registration(token):
+    email = verify_email_token(token)
+    if not email:
+        flash('Invalid or expired verification link.', 'error')
+        return redirect(url_for('login'))
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('login'))
+
+    # Login user after verifying email
+    login_user(user)
+    flash('✅ Email verified! Welcome to T-Give Nexus.', 'success')
+    return redirect(url_for('welcome'))
+        
 #-------------‐-------------------------------------
 
 @app.route("/welcome")
