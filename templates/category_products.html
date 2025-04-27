@@ -57,11 +57,11 @@
                         </svg>
                         
                         <!-- Product Image -->
-                        <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                        <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ product.image_url }}" alt="{{ product.name }}" 
                              class="absolute inset-0 w-full h-full object-cover mix-blend-luminosity group-hover:mix-blend-normal transition-all"
                              loading="lazy"
                              onerror="this.onerror=null;this.src='{{ product.imgur_url }}'">
-                    </div>
+                    </div></a>
 
                     <!-- Product Details -->
                     <div class="p-6 space-y-4">
