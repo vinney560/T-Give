@@ -74,16 +74,17 @@
             }
             
             .left-container {
-                padding-bottom: 55vh !important;
+                padding-bottom: 60vh !important;
+                z-index: 1;
             }
             
             .details-container {
-                position: fixed !important;
+                position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                height: 55vh;
-                z-index: 50;
+                height: 60vh;
+                z-index: 2;
                 background: linear-gradient(to bottom, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
                 border-top: 2px solid rgba(8, 145, 178, 0.15);
                 box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.3);
@@ -91,15 +92,15 @@
             }
             
             .details-container > div {
-                border-radius: 1.5rem 1.5rem 0 0 !important;
-                padding: 1.5rem !important;
                 height: 100%;
                 overflow-y: auto;
+                padding: 1.5rem !important;
+                border-radius: 1.5rem 1.5rem 0 0 !important;
             }
             
             .quantity-container {
-                z-index: 100;
                 position: relative;
+                z-index: 100;
             }
         }
     </style>
@@ -305,34 +306,22 @@
         }
 
         // Mobile Keyboard Handling
-        let lastHeight = window.innerHeight;
+        let lastWindowHeight = window.innerHeight;
         const detailsContainer = document.querySelector('.details-container');
-        const leftContainer = document.querySelector('.left-container');
 
         function handleResize() {
-            const newHeight = window.innerHeight;
-            const keyboardHeight = lastHeight - newHeight;
-
+            const currentHeight = window.innerHeight;
+            const keyboardHeight = lastWindowHeight - currentHeight;
+            
             if (keyboardHeight > 100) {
                 detailsContainer.style.transform = `translateY(-${keyboardHeight}px)`;
-                leftContainer.style.paddingBottom = `${keyboardHeight + 55}vh`;
             } else {
                 detailsContainer.style.transform = 'none';
-                leftContainer.style.paddingBottom = '55vh';
             }
-            lastHeight = newHeight;
+            lastWindowHeight = currentHeight;
         }
 
         window.addEventListener('resize', handleResize);
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', handleResize);
-        }
-
-        document.getElementById('quantity').addEventListener('focus', () => {
-            setTimeout(() => {
-                detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 100);
-        });
 
         // Flash Messages
         {% with messages = get_flashed_messages(with_categories=true) %}
