@@ -1288,21 +1288,21 @@ def db_storage_neon():
 
 import requests
 
-# Your provided Xata API URL and API Key
+# Xata API endpoint and API key
 XATA_API_URL = "https://vinney560-s-workspace-utg7k3.us-east-1.xata.sh/db/tgive3:main/query"
-XATA_API_KEY = "xau_lpoTy0N9vEJVZXEe7XUMZcL0xdKvxjgs2"  # API key you provided
+XATA_API_KEY = "xau_lpoTy0N9vEJVZXEe7XUMZcL0xdKvxjgs2"  # Your API key
 
 @app.route('/admin/db_storage_xata')
 @admin_required
 def db_storage_xata():
     try:
-        # Prepare headers with API key for authentication
+        # Prepare headers with the correct API key for authentication
         headers = {
             "Authorization": f"Bearer {XATA_API_KEY}",
             "Content-Type": "application/json"
         }
 
-        # Sample SQL-like query to fetch table names and row counts
+        # Sample SQL-like query to fetch table information from Xata
         query = {
             "query": """
                 SELECT table_name, COUNT(*) AS num_rows
@@ -1315,14 +1315,19 @@ def db_storage_xata():
 
         # Send the POST request to Xata API
         response = requests.post(XATA_API_URL, json=query, headers=headers)
-        response.raise_for_status()  # Raise an error for 4xx/5xx responses
-        table_sizes = response.json()  # Get the response data as JSON
+        
+        # Raise an error for 4xx/5xx responses
+        response.raise_for_status()
+        
+        # Parse the JSON response
+        table_sizes = response.json()
 
         # Render the results in the admin storage page
         return render_template('admin_storage.html', tables=table_sizes['rows'])
 
     except requests.exceptions.RequestException as e:
-        return f"<h3>Error: {str(e)}</h3>"
+        # Return an error message with full response for debugging
+        return f"<h3>Error: {str(e)}</h3><br>Response: {e.response.text}"
 
     log_admin_activity("[ADMIN VIEW DB] Viewed database storage")
 #===================================================
