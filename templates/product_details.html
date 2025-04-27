@@ -1,317 +1,224 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ product.name }} - Product Details</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-    .product-details {
-      max-width: 87%;
-      margin: 20px auto;
-      background-color: #fff;
-      text-align: center;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .upper-container {
-      margin-bottom: 30px;
-    }
-    .product-details h2 {
-      font-size: 2rem;
-      color: #333;
-    }
-    .product-image {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      max-width: 450px;
-      margin: 20px 0;
-      border: solid 2px cyan;
-    }
-    .product-description {
-      color: #666;
-      margin: 20px 0;
-      text-align: left;
-      padding-left: 20px;
-    }
-    .price {
-      font-size: 1.5rem;
-      color: #27ae60;
-      margin: 20px 0;
-    }
-    .rating-container {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
-    }
-    .star {
-      font-size: 2rem;
-      color: #ccc;
-      cursor: pointer;
-      margin: 0 5px;
-    }
-    .star.selected {
-      color: #f39c12;
-    }
-    .submit-rating-btn {
-      background-color: #27ae60;
-      color: white;
-      padding: 10px 20px;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 20px;
-      width: 45%;
-    }
-    .submit-rating-btn:hover {
-      background-color: #2ecc71;
-    }
-    .glow-button {
-      background: #00ffc3;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 20px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: 0 0 8px #00ffc3, 0 0 20px #00ffc3;
-      transition: all 0.3s ease-in-out;
-    }
-    .glow-button:disabled {
-      background: #cccccc !important;
-      color: #666 !important;
-      box-shadow: none !important;
-      cursor: not-allowed !important;
-      opacity: 0.7;
-    }
-    .glow-button:hover:not(:disabled) {
-      box-shadow: 0 0 16px #00ffc3, 0 0 30px #00ffc3;
-      background: #00e6b0;
-    }
-    .view-cart { 
-      position: fixed; 
-      bottom: 40px; 
-      right: 20px; 
-      padding: 14px;
-      background: darkred; 
-      color: black; 
-      border: solid cyan 2px; 
-      border-radius: 50%; 
-      cursor: pointer; 
-      font-size: 18px;
-      font-weight: bold; 
-      z-index: 1000;
-    }
-    .view-cart:hover { 
-      background: darkred; 
-    }
-    .back-btn { 
-      position: absolute; 
-      top: 20px; 
-      left: 10px;
-      background: transparent; 
-      color: red; 
-      border: none; 
-      cursor: pointer; 
-      font-size: 30px;
-      z-index: 1551;
-    }
-    .back-btn:hover { 
-      background: #00cccc;
-    }
-    .toast-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-      gap: 10px;
-      z-index: 10000;
-    }
-    .toast {
-      min-width: 150px;
-      max-width: 90%;
-      padding: 12px 25px;
-      border-radius: 8px;
-      color: white;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .toast.exit {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    .toast.success {
-      background: #2ecc71;
-      border-left: 5px solid #27ae60;
-    }
-    .toast.error {
-      background: #e74c3c;
-      border-left: 5px solid #c0392b;
-    }
-    .toast.success::before {
-      content: '✓';
-      font-size: 1.2em;
-    }
-    .toast.error::before {
-      content: '✕';
-      font-size: 1.2em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - T-Give Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="h-full bg-gradient-to-br from-gray-900 to-gray-800">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-2 w-full max-w-xs"></div>
 
-<div class="product-details">
-  <button class="back-btn" onclick="closePage()">✖</button>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Back Button -->
+        <button onclick="history.back()" class="mb-8 group">
+            <svg class="w-8 h-8 text-cyan-400 group-hover:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+        </button>
 
-  <!-- Upper Container: Product Image and Name -->
-  <div class="upper-container">
-    <marquee behavior="scroll" direction="left"><span style="color:#FCB245"><b>WE ARE T-GIVE ‼️️ WELCOME ALL</b></span></marquee>
-    <h2>{{ product.name }}</h2>
-    <img src="{{ product.image_url }}"
-       onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
-       alt="{{ product.name }}" class="product-image">
-  </div>
+        <div class="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl p-6 sm:p-10">
+            <!-- Product Header -->
+            <div class="mb-10 space-y-6">
+                <div class="animate-pulse text-center">
+                    <span class="text-cyan-400 font-semibold text-lg tracking-wider">T-GIVE NEXUS COLLECTION</span>
+                </div>
+                
+                <h1 class="text-4xl font-bold text-cyan-300 text-center">{{ product.name }}</h1>
+                
+                <div class="relative aspect-square bg-gray-700/30 rounded-2xl overflow-hidden border-2 border-cyan-500/20">
+                    <img src="{{ product.image_url }}" 
+                         onerror="this.onerror=null;this.src='{{ product.imgur_url }}'"
+                         alt="{{ product.name }}" 
+                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                    <svg class="absolute inset-0 w-full h-full text-gray-600/20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+            </div>
 
-  <!-- Lower Container: Product Description, Price, Rating, etc. -->
-  <div class="lower-container">
-    <ul class="product-description">
-      {% for line in product.description.split('\n') %}
-        <li>{{ line }}</li>
-      {% endfor %}
-    </ul>
+            <!-- Product Details -->
+            <div class="space-y-10">
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-bold text-cyan-400">Description</h2>
+                    <ul class="space-y-3 text-gray-300 pl-4 border-l-4 border-cyan-500/30">
+                        {% for line in product.description.split('\n') %}
+                        <li class="relative pl-4 before:absolute before:left-0 before:top-3 before:w-2 before:h-0.5 before:bg-cyan-400">
+                            {{ line }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
-    <p class="price">Price: Ksh {{ product.price }}</p>
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 bg-cyan-900/20 p-6 rounded-xl">
+                    <div class="space-y-2">
+                        <span class="text-2xl font-bold text-green-400">Ksh {{ product.price }}</span>
+                        <p class="text-sm text-cyan-400">In Stock</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <input type="number" id="quantity" name="quantity" min="1" value="1"
+                                   class="w-24 px-4 py-3 bg-gray-700 rounded-lg text-center border-2 border-cyan-500/30 focus:border-cyan-400 focus:ring-0">
+                            <svg class="absolute right-3 top-3 w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 3a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1h12zm0-2H4a3 3 0 00-3 3v12a3 3 0 003 3h12a3 3 0 003-3V4a3 3 0 00-3-3z"/>
+                            </svg>
+                        </div>
+                        <button onclick="addToCart({{ product.id }}, this)" 
+                                class="px-8 py-3.5 bg-cyan-600 hover:bg-cyan-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-cyan-500/30 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
 
-    <label for="quantity" style="font-size: 1.1rem; margin-right: 10px;">Quantity:</label>
-    <input type="number" id="quantity" name="quantity" min="1" value="1"
-           style="padding: 8px; width: 80px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc; text-align: center;" required>
-    <button onclick="addToCart({{ product.id }}, this)" class="glow-button">Add to Cart</button>
+                <!-- Rating Section -->
+                <div class="space-y-8">
+                    <div class="space-y-6">
+                        <h2 class="text-2xl font-bold text-cyan-400">Product Rating</h2>
+                        
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                            <div class="space-y-4">
+                                <div class="flex gap-1.5">
+                                    {% for i in range(1,6) %}
+                                    <button class="star-btn group" data-value="{{ i }}">
+                                        <svg class="w-10 h-10 transition-all duration-300 {% if i <= product.get_average_rating() %}text-amber-400{% else %}text-gray-500{% endif %}" 
+                                             viewBox="0 0 20 20"
+                                             fill="{% if i <= product.get_average_rating() %}currentColor{% else %}none{% endif %}" 
+                                             stroke="currentColor">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                                <p class="text-center text-gray-300">
+                                    Your Rating: <span id="rating-result" class="font-bold text-amber-400">Not Rated</span>
+                                </p>
+                            </div>
 
-    <div class="rating-container">
-      <span class="star" data-value="1">&#9733;</span>
-      <span class="star" data-value="2">&#9733;</span>
-      <span class="star" data-value="3">&#9733;</span>
-      <span class="star" data-value="4">&#9733;</span>
-      <span class="star" data-value="5">&#9733;</span>
-    </div>
-    <p>Your Rating: <span id="rating-result">Not Rated</span></p>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-cyan-400">{{ product.get_average_rating() }}/5</p>
+                                <p class="text-sm text-gray-400">Average Rating</p>
+                            </div>
+                        </div>
+                    </div>
 
-    <form onsubmit="event.preventDefault(); submitRating({{ product.id }});">
-      <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
-      <button type="submit" class="submit-rating-btn">Submit Rating</button>
-    </form>
+                    <form onsubmit="event.preventDefault(); submitRating({{ product.id }});" 
+                          class="text-center">
+                        <input type="hidden" id="csrf-token" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" 
+                                class="px-8 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-amber-500/30">
+                            Submit Rating
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-    <p id="average-rating">Average Rating: {{ average_rating }}</p>
-  </div>
+        <!-- Floating Cart Button -->
+        <a href="{{ url_for('cart') }}" 
+           class="fixed bottom-8 right-8 p-5 bg-cyan-600 hover:bg-cyan-700 rounded-full shadow-2xl transition-all hover:rotate-[30deg]">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+        </a>
+    </main>
 
-  <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">🛒</button>
-</div>
+    <script>
+        // Rating System
+        let selectedRating = 0;
+        document.querySelectorAll('.star-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedRating = parseInt(btn.dataset.value);
+                document.querySelectorAll('.star-btn').forEach(b => {
+                    const star = b.querySelector('svg');
+                    const value = parseInt(b.dataset.value);
+                    star.style.fill = value <= selectedRating ? 'currentColor' : 'none';
+                    star.classList.toggle('text-amber-400', value <= selectedRating);
+                    star.classList.toggle('text-gray-500', value > selectedRating);
+                });
+                document.getElementById('rating-result').textContent = selectedRating;
+            });
+        });
 
-<div id="toast-container" class="toast-container"></div>
+        // Toast System
+        function showToast(message, success = true) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-lg shadow-md flex items-center gap-3 ${
+                success ? 'bg-green-500/90' : 'bg-red-500/90'
+            } animate-fade-in`;
+            
+            toast.innerHTML = `
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${
+                        success ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'
+                    }"/>
+                </svg>
+                <span>${message}</span>
+            `;
 
-<script>
-  let selectedRating = 0;
-  const stars = document.querySelectorAll('.star');
-  stars.forEach(star => {
-    star.addEventListener('click', () => {
-      selectedRating = parseInt(star.getAttribute('data-value'));
-      stars.forEach(s => s.classList.toggle('selected', parseInt(s.getAttribute('data-value')) <= selectedRating));
-      document.getElementById('rating-result').innerText = `${selectedRating}`;
-    });
-  });
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
 
-  function showToast(message, success = true) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    const typeClass = success ? 'success' : 'error';
-    toast.className = `toast ${typeClass}`;
-    toast.textContent = message;
-    container.prepend(toast);
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-      toast.classList.add('exit');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
+        // Cart System
+        async function addToCart(productId, button) {
+            button.disabled = true;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            
+            try {
+                const response = await fetch('/add_to_cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.getElementById('csrf-token').value
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity })
+                });
+                
+                const data = await response.json();
+                showToast(data.message, data.success);
+            } catch {
+                showToast("Failed to add to cart", false);
+            } finally {
+                setTimeout(() => button.disabled = false, 2000);
+            }
+        }
 
-  function submitRating(productId) {
-    if (selectedRating === 0) {
-      showToast("Please select a rating.", false);
-      return;
-    }
-    fetch(`/product/${productId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': document.getElementById('csrf-token').value
-      },
-      body: JSON.stringify({ rating: selectedRating })
-    })
-    .then(res => res.json())
-    .then(data => {
-      showToast(data.message, data.success);
-      if (data.success) {
-        document.getElementById('average-rating').innerText = `Average Rating: ${data.average_rating}`;
-      }
-    })
-    .catch(() => showToast("An error occurred.", false));
-  }
+        // Rating Submission
+        async function submitRating(productId) {
+            if (!selectedRating) return showToast("Please select a rating", false);
+            
+            try {
+                const response = await fetch(`/product/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.getElementById('csrf-token').value
+                    },
+                    body: JSON.stringify({ rating: selectedRating })
+                });
+                
+                const data = await response.json();
+                showToast(data.message, data.success);
+                if (data.success) {
+                    document.querySelector('.text-3xl').textContent = `${data.average_rating}/5`;
+                }
+            } catch {
+                showToast("Rating submission failed", false);
+            }
+        }
 
-  function addToCart(productId, button) {
-    button.disabled = true;
-    const quantity = parseInt(document.getElementById('quantity').value);
-    
-    fetch('/add_to_cart', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': document.getElementById('csrf-token').value
-      },
-      body: JSON.stringify({ product_id: productId, quantity: quantity })
-    })
-    .then(res => res.json())
-    .then(data => showToast(data.message, data.success))
-    .catch(() => showToast("Failed to add to cart.", false))
-    .finally(() => {
-      setTimeout(() => {
-        button.disabled = false;
-      }, 3000);
-    });
-  }
-
-  function closePage() {
-    history.back();
-  }
-
-  // Handle flash messages from Flask
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      showToast("{{ message }}", "{{ category }}" === "success");
-    {% endfor %}
-  {% endwith %}
-</script>
-
+        // Handle Flask flash messages
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                showToast("{{ message }}", "{{ category }}" === "success");
+            {% endfor %}
+        {% endwith %}
+    </script>
 </body>
 </html>
