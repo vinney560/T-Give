@@ -209,7 +209,6 @@ class AdminActivity(db.Model):
 #              ____INITIALISING DATABASE____
 
 with app.app_context():
-    db.drop_all()
     db.create_all()
         
 #---------------------------------------------------
@@ -700,6 +699,21 @@ def search_results():
     query = request.args.get('q', '').lower()
     results = Product.query.filter(Product.name.ilike(f'%{query}%')).all()
     return render_template('search.html', products=results, query=query)    
+
+@app.route('/categories')
+def categories():
+    categories = db.session.query(
+        Product.category,
+        db.func.count(Product.id)
+    ).group_by(Product.category).all()
+    return render_template('categories.html', categories=categories)
+
+@app.route('/category/<string:category_name>')
+def category_products(category_name):
+    products = Product.query.filter_by(category=category_name).all()
+    return render_template('category_products.html',
+                         category=category_name,
+                         category_products=products)
 
 @app.route('/products')
 def products():

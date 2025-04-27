@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ category }} Products - T-Give Nexus</title>
+    <style>
+        /* Reuse all main styles from products.html */
+        body {
+            background: #0e0e0e;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .header {  
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 130px;
+            background: linear-gradient(to right, #00cccc, #003333);
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 20px;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 255, 255, 0.5);
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 100% 100%, 0 100%, 0 85%);
+        }
+
+        .category-header {
+            margin: 150px auto 30px;
+            padding: 20px;
+            font-size: 2.5rem;
+            color: #00f7ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #00f7ff;
+            width: fit-content;
+        }
+
+        .products-grid { 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: #1c1c1c;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.2);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .product-name {
+            font-size: 1.4rem;
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .product-price {
+            color: #00f7ff;
+            font-size: 1.3rem;
+            margin: 10px 0;
+        }
+
+        /* Reuse other styles from products.html */
+        .view-cart {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 17px 34px;
+            background: cyan;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>{{ category }} Products</h1>
+        </div>
+    </div>
+
+    <div class="category-header">{{ category }}</div>
+
+    <div class="products-grid">
+        {% for product in category_products %}
+        <div class="product-card">
+            <a href="{{ url_for('product_details', product_id=product.id) }}">
+                <img src="{{ product.image_url }}"
+                     onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
+                     alt="{{ product.name }}" 
+                     loading="lazy">
+            </a>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">Ksh {{ product.price }}</div>
+            <div class="product-rating">
+                ★ {{ product.get_average_rating() }}/5
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Navigation and Toast Elements -->
+    <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
+    <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'"><b>≡</b></button>
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Reuse all JavaScript functionality from products.html
+        function showToast(message, success = true) {
+            const toast = document.getElementById('toast');
+            const typeClass = success ? 'success' : 'error';
+        
+            toast.classList.remove('show', 'success', 'error');
+            clearTimeout(toast.timeoutId);
+        
+            toast.textContent = message;
+            toast.classList.add(typeClass);
+            void toast.offsetHeight;
+            toast.classList.add('show');
+            toast.timeoutId = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}  
+                    showToast("{{ message }}", "{{ category }}" === 'success');
+                {% endfor %}  
+            {% endif %}  
+        {% endwith %}
+    </script>
+</body>
+</html>
