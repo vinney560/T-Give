@@ -209,8 +209,7 @@ class AdminActivity(db.Model):
 #              ____INITIALISING DATABASE____
 
 with app.app_context():
-    db.session.execute(text("ALTER TABLE user ADD COLUMN email_verified;"))
-    db.session.commit()
+    db.drop_all()
     db.create_all()
         
 #---------------------------------------------------
