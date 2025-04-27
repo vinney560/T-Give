@@ -416,7 +416,12 @@ def format_mobile(mobile):
 @limiter.limit("20 per minute")
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('admin_dashboard' if current_user.role == 'admin' else 'products'))
+        if session.get('role') == 'admin':
+            return redirect(url_for('admin_dashboard'))
+        elif session.get('role') == 'superadmin':
+            return redirect(url_for('super_admin_dashboard'))
+        else:
+            return redirect(url_for('products'))
 
     mobile = ""
 
@@ -424,22 +429,27 @@ def login():
         raw_mobile = request.form['mobile'].strip()
         mobile = format_mobile(raw_mobile)
         password = request.form['password']
+        
         user = User.query.filter_by(mobile=mobile).first()
 
         if user and check_password_hash(user.password, password):
             if user.role == 'banned':
-                flash('⛔')
+                flash('⛔ Account banned.', 'error')
                 return render_template("banned.html")
-            if user.active == False:
-                flash("Account Deactivated")
+
+            if not user.active:
+                flash("⚠️ Account Deactivated", "error")
                 return redirect(url_for('login'))
+
             login_user(user)
             session['role'] = user.role
+            session['active'] = user.active
+
             if user.role == 'admin':
                 log_admin_activity("[ADMIN LOGIN] logged in.")
-            else:
-                pass
-            flash("♻ Welcome back! ", "success")
+
+            flash("♻ Welcome back!", "success")
+
             if user.role == 'superadmin':
                 return redirect(url_for('super_admin_dashboard'))
             elif user.role == 'admin':
@@ -447,7 +457,7 @@ def login():
             else:
                 return redirect(url_for('products'))
 
-        flash("Invalid credentials.", "error")
+        flash(" nvalid mobile or password", "error")
         return render_template("login.html", mobile=raw_mobile, password=password)
 
     return render_template('login.html', mobile=mobile)
