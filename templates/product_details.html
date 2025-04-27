@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>{{ product.name }} - T-Give Nexus</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -57,19 +57,22 @@
             font-size: 1.2em;
         }
 
-        /* Mobile Fixes */
+        /* Mobile Fixes - Full Implementation */
         @media (max-width: 768px) {
             html {
-                overflow-x: hidden;
-                position: fixed;
-                height: 100%;
-                width: 100%;
+                height: 100% !important;
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
             }
             
             body {
                 overflow-y: auto;
                 height: auto;
                 min-height: 100vh;
+                position: fixed;
+                width: 100%;
+                -webkit-overflow-scrolling: touch;
             }
             
             main {
@@ -81,19 +84,36 @@
             
             .md\:w-1\/2 {
                 width: 100% !important;
-                position: relative;
+            }
+            
+            /* Fixed Right Container */
+            .details-container {
+                position: fixed !important;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto !important;
                 transform: none !important;
+                z-index: 50;
+                background: linear-gradient(to bottom right, #1a1a1a, #2d2d2d);
+                border-top: 2px solid #0891b220;
+                box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.3);
+                max-height: 60vh;
+                overflow-y: auto;
+                transition: transform 0.3s ease;
+            }
+            
+            .details-container > div {
+                border-radius: 1.5rem 1.5rem 0 0 !important;
+                padding: 1.5rem !important;
             }
             
             .quantity-container {
-                width: 100%;
-                max-width: 150px;
-                margin-left: auto;
-            }
-
-            input:focus {
                 position: relative;
                 z-index: 100;
+            }
+            
+            input:focus {
                 transform: none !important;
             }
         }
@@ -155,7 +175,7 @@
         </div>
 
         <!-- Right Container - Details Section -->
-        <div class="md:w-1/2 h-full flex flex-col">
+        <div class="md:w-1/2 h-full flex flex-col details-container">
             <div class="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl p-6 sm:p-10 h-full flex flex-col">
                 <!-- Product Info -->
                 <div class="flex-1 space-y-8">
@@ -221,7 +241,7 @@
     </main>
 
     <script>
-        // Rating System
+        // Original JavaScript with Mobile Fixes
         let selectedRating = 0;
         document.querySelectorAll('.star-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -237,7 +257,6 @@
             });
         });
 
-        // Toast System
         function showToast(message, success = true) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -258,7 +277,6 @@
             }, 3000);
         }
 
-        // Cart System
         async function addToCart(productId, button) {
             button.disabled = true;
             const quantity = parseInt(document.getElementById('quantity').value);
@@ -282,7 +300,6 @@
             }
         }
 
-        // Rating Submission
         async function submitRating(productId) {
             if (!selectedRating) return showToast("Please select a rating", false);
             
@@ -306,28 +323,32 @@
             }
         }
 
-        // Mobile Input Handling
-        function handleMobileInputFocus() {
-            if (window.innerWidth < 768) {
-                const activeElement = document.activeElement;
-                if (activeElement.id === 'quantity') {
-                    setTimeout(() => {
-                        activeElement.scrollIntoView({ 
-                            behavior: 'smooth', 
-                            block: 'nearest',
-                            inline: 'nearest'
-                        });
-                    }, 100);
-                }
+        // Mobile Keyboard Handling
+        let lastHeight = window.innerHeight;
+        const detailsContainer = document.querySelector('.details-container');
+
+        function handleResize() {
+            const newHeight = window.innerHeight;
+            const keyboardHeight = lastHeight - newHeight;
+
+            if (keyboardHeight > 100) {
+                detailsContainer.style.transform = `translateY(-${keyboardHeight}px)`;
+            } else {
+                detailsContainer.style.transform = 'none';
             }
+            lastHeight = newHeight;
         }
 
-        document.getElementById('quantity').addEventListener('focus', handleMobileInputFocus);
-        document.getElementById('quantity').addEventListener('blur', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.addEventListener('resize', handleResize);
+        window.visualViewport?.addEventListener('resize', handleResize);
+
+        document.getElementById('quantity').addEventListener('focus', () => {
+            setTimeout(() => {
+                detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 300);
         });
 
-        // Handle Flask flash messages
+        // Flash Messages
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
                 showToast("{{ message }}", "{{ category }}" === "success");
