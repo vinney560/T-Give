@@ -123,12 +123,6 @@
       transform: scale(1.02);
     }
 
-    .checkbox-label {
-      margin-top: 10px;
-      display: inline-block;
-      font-size: 14px;
-    }
-
     hr {
       border: none;
       border-top: 1px solid #444;
@@ -182,16 +176,6 @@
 
       <hr>
 
-      <label for="current_code">Current Secret Code</label>
-      <input type="password" id="current_code" name="current_code">
-
-      <label for="new_code">New Secret Code</label>
-      <input type="password" id="new_code" name="new_code">
-
-      <label class="checkbox-label">
-        <input type="checkbox" onclick="toggleSecret()"> Show Secret Codes
-      </label>
-
       <button type="submit">Save Settings</button>
     </form>
   </div>
@@ -203,13 +187,6 @@
 
     function closeMenu() {
       document.getElementById('sidebar').style.left = '-260px';
-    }
-
-    function toggleSecret() {
-      const cur = document.getElementById("current_code");
-      const newC = document.getElementById("new_code");
-      cur.type = cur.type === "password" ? "text" : "password";
-      newC.type = newC.type === "password" ? "text" : "password";
     }
   </script>
 </body>
