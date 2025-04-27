@@ -759,11 +759,11 @@ def product_details(product_id):
             if rating_value < 1 or rating_value > 5:
                 return jsonify({'success': False, 'message': 'Rating must be between 1 and 5.'}), 400
 
-            existing_rating = Rating.query.filter_by(product_id=product_id, user_id=current_user.mobile).first()
+            existing_rating = Rating.query.filter_by(product_id=product_id, user_id=current_user.id).first()
             if existing_rating:
                 message = "Your rating has been updated."
             else:
-                new_rating = Rating(rating=rating_value, product_id=product_id, user_id=current_user.mobile)
+                new_rating = Rating(rating=rating_value, product_id=product_id, user_id=current_user.id)
                 db.session.add(new_rating)
                 message = "Thank you for your rating!"
 
@@ -774,7 +774,7 @@ def product_details(product_id):
 
         return jsonify({'success': False, 'message': 'Rating value is required.'}), 400
 
-    user_rating = Rating.query.filter_by(product_id=product_id, user_id=current_user.mobile).first()
+    user_rating = Rating.query.filter_by(product_id=product_id, user_id=current_user.id).first()
     average_rating = product.get_average_rating()
 
     return render_template('product_details.html', product=product, user_rating=user_rating, average_rating=average_rating)
