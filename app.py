@@ -664,8 +664,6 @@ def home():
     
     products = Product.query.all()
     for product in products:
-        get_average_rating = product.get_average_rating()
-    for product in products:
         product.display_image = get_image_url(product)
     
     return render_template("index.html", products=products)
