@@ -103,6 +103,7 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(255), nullable=True)
     agreed = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
+    email_verified = db.Column(db.Boolean, default=False)
     
 #---------------------------------------------------
 class Product(db.Model):
@@ -441,6 +442,9 @@ def login():
             if not user.active:
                 flash("⚠️ Account Deactivated", "error")
                 return redirect(url_for('login'))
+            if not user.email_verified:
+                flash('Please verify your email first before logging in.', 'error')
+                return render_template('login.html', mobile=raw_mobile)    
 
             login_user(user)
             session['role'] = user.role
@@ -574,7 +578,8 @@ def verify_registration(token):
         flash('User not found.', 'error')
         return redirect(url_for('login'))
 
-    # Login user after verifying email
+    user.email_verified=True
+    db.session.commit()
     login_user(user)
     flash('✅ Email verified! Welcome to T-Give Nexus.', 'success')
     return redirect(url_for('welcome'))
