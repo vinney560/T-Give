@@ -1257,9 +1257,9 @@ def about():
 #                       >>>>ADMIN ENDPOINTS<<<<<
 #===================================================
 
-@app.route('/admin/db_storage')
+@app.route('/admin/db_storage_neon')
 @admin_required 
-def db_storage():
+def db_storage_neon():
     try:
         conn = pg8000.connect(
             user="tgive3_owner",
@@ -1285,6 +1285,46 @@ def db_storage():
     except Exception as e:
         return f"<h3>Error: {e}</h3>"
 
+
+import requests
+
+# Your provided Xata API URL and API Key
+XATA_API_URL = "https://vinney560-s-workspace-utg7k3.us-east-1.xata.sh/db/tgive3:main/query"
+XATA_API_KEY = "xau_lpoTy0N9vEJVZXEe7XUMZcL0xdKvxjgs2"  # API key you provided
+
+@app.route('/admin/db_storage_xata')
+@admin_required
+def db_storage_xata():
+    try:
+        # Prepare headers with API key for authentication
+        headers = {
+            "Authorization": f"Bearer {XATA_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        # Sample SQL-like query to fetch table names and row counts
+        query = {
+            "query": """
+                SELECT table_name, COUNT(*) AS num_rows
+                FROM information_schema.tables
+                WHERE table_schema = 'public'
+                GROUP BY table_name
+                ORDER BY num_rows DESC;
+            """
+        }
+
+        # Send the POST request to Xata API
+        response = requests.post(XATA_API_URL, json=query, headers=headers)
+        response.raise_for_status()  # Raise an error for 4xx/5xx responses
+        table_sizes = response.json()  # Get the response data as JSON
+
+        # Render the results in the admin storage page
+        return render_template('admin_storage.html', tables=table_sizes['rows'])
+
+    except requests.exceptions.RequestException as e:
+        return f"<h3>Error: {str(e)}</h3>"
+
+    log_admin_activity("[ADMIN VIEW DB] Viewed database storage")
 #===================================================
 #===================================================
 
