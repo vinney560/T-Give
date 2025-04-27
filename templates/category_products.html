@@ -1,165 +1,76 @@
+<!-- category_products.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <title>{{ category }} Products - T-Give Nexus</title>
-    <style>
-        /* Reuse all main styles from products.html */
-        body {
-            background: #0e0e0e;
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-        }
-
-        .header {  
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 130px;
-            background: linear-gradient(to right, #00cccc, #003333);
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            padding: 10px 20px;
-            z-index: 1000;
-            box-shadow: 0 3px 10px rgba(0, 255, 255, 0.5);
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 100% 100%, 0 100%, 0 85%);
-        }
-
-        .category-header {
-            margin: 150px auto 30px;
-            padding: 20px;
-            font-size: 2.5rem;
-            color: #00f7ff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #00f7ff;
-            width: fit-content;
-        }
-
-        .products-grid { 
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            padding: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .product-card {
-            background: #1c1c1c;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 15px;
-            transition: transform 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .product-card:hover {
-            transform: scale(1.03);
-            box-shadow: 0 0 15px rgba(0, 247, 255, 0.2);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .product-name {
-            font-size: 1.4rem;
-            margin: 10px 0;
-            font-weight: 600;
-        }
-
-        .product-price {
-            color: #00f7ff;
-            font-size: 1.3rem;
-            margin: 10px 0;
-        }
-
-        /* Reuse other styles from products.html */
-        .view-cart {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 17px 34px;
-            background: cyan;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
-            z-index: 1000;
-        }
-    </style>
+    <title>{{ category }} - T-Give Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <h1>{{ category }} Products</h1>
-        </div>
-    </div>
+<body class="h-full bg-slate-900 relative overflow-x-hidden">
+    <!-- Circuit Board Background -->
+    <svg class="absolute inset-0 -z-10 opacity-5" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 50 Q25 40,50 50 T100 50" fill="none" stroke="currentColor" stroke-width="0.5" class="text-cyan-900"/>
+        <path d="M0 30 Q50 40,100 30" fill="none" stroke="currentColor" stroke-width="0.5" class="text-cyan-900"/>
+        <path d="M0 70 Q50 60,100 70" fill="none" stroke="currentColor" stroke-width="0.5" class="text-cyan-900"/>
+    </svg>
 
-    <div class="category-header">{{ category }}</div>
-
-    <div class="products-grid">
-        {% for product in category_products %}
-        <div class="product-card">
-            <a href="{{ url_for('product_details', product_id=product.id) }}">
-                <img src="{{ product.image_url }}"
-                     onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
-                     alt="{{ product.name }}" 
-                     loading="lazy">
-            </a>
-            <div class="product-name">{{ product.name }}</div>
-            <div class="product-price">Ksh {{ product.price }}</div>
-            <div class="product-rating">
-                ★ {{ product.get_average_rating() }}/5
+    <div class="min-h-full relative z-10">
+        <header class="bg-gradient-to-r from-cyan-600 to-slate-800 shadow-xl sticky top-0">
+            <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="{{ url_for('categories') }}" class="text-cyan-300 hover:text-cyan-100 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold text-cyan-100">{{ category }}</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-cyan-300 text-sm hidden sm:block">{{ category_products|length }} products found</span>
+                    <svg class="w-6 h-6 text-cyan-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>
+                    </svg>
+                </div>
             </div>
-        </div>
-        {% endfor %}
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {% for product in category_products %}
+                <a href="{{ url_for('product_details', product_id=product.id) }}" class="group relative block bg-slate-800/50 backdrop-blur-sm rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all border border-slate-700/50 hover:border-cyan-500/30">
+                    <div class="relative aspect-square bg-slate-700/20">
+                        <svg class="absolute inset-0 w-full h-full text-slate-700/50" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                             class="absolute inset-0 w-full h-full object-cover mix-blend-multiply"
+                             onerror="this.onerror=null;this.src='{{ product.imgur_url }}'">
+                    </div>
+                    
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-cyan-100 truncate mb-2">{{ product.name }}</h3>
+                        <div class="flex items-center justify-between">
+                            <p class="text-cyan-400 font-semibold">Ksh {{ product.price }}</p>
+                            <div class="flex items-center text-amber-400">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                                <span>{{ product.get_average_rating() }}/5</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </main>
     </div>
 
-    <!-- Navigation and Toast Elements -->
-    <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
-    <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'"><b>≡</b></button>
-    <div id="toast" class="toast"></div>
-
-    <script>
-        // Reuse all JavaScript functionality from products.html
-        function showToast(message, success = true) {
-            const toast = document.getElementById('toast');
-            const typeClass = success ? 'success' : 'error';
-        
-            toast.classList.remove('show', 'success', 'error');
-            clearTimeout(toast.timeoutId);
-        
-            toast.textContent = message;
-            toast.classList.add(typeClass);
-            void toast.offsetHeight;
-            toast.classList.add('show');
-            toast.timeoutId = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}  
-                    showToast("{{ message }}", "{{ category }}" === 'success');
-                {% endfor %}  
-            {% endif %}  
-        {% endwith %}
-    </script>
+    <!-- Floating Action Button -->
+    <a href="{{ url_for('cart') }}" class="fixed bottom-6 right-6 inline-flex items-center px-6 py-3 rounded-full shadow-lg bg-cyan-600 hover:bg-cyan-700 transition-all group">
+        <svg class="w-6 h-6 mr-2 text-cyan-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <span class="text-cyan-100 font-medium">View Cart</span>
+    </a>
 </body>
 </html>
