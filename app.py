@@ -361,7 +361,7 @@ def send_order_email(subject, recipient, subject_title, message_intro, mobile, e
             mobile=mobile, 
             total_price=total_price, 
             products=products,
-            shop_url=url_for('home')  # Assuming you have a 'home' route
+            shop_url=url_for('home')  
         )
     )
 
@@ -375,18 +375,17 @@ def send_order_email(subject, recipient, subject_title, message_intro, mobile, e
 @admin_required
 def send_email():
 
-    users = User.query.all()  # Fetch all users from the database
+    users = User.query.all()
     if request.method == 'POST':
-        selected_emails = request.form.getlist('emails')  # Get selected emails
+        selected_emails = request.form.getlist('emails')  
         subject = request.form.get('subject')
         message = request.form.get('message')
 
-        # Send email to each selected user
         for email in selected_emails:
             send_email_to_user(subject, email, message)
 
         flash('Emails sent successfully!', 'success')
-        return redirect(url_for('admin_dashboard'))  # Redirect after sending email
+        return redirect(url_for('admin_dashboard' if current_user.role == 'admin' else 'super_admin_dashboard')) 
 
     return render_template('send_email.html', users=users)
 
@@ -395,7 +394,7 @@ def send_email_to_user(subject, recipient, message):
         subject=subject,
         recipients=[recipient],
         html=render_template(
-            'email_template.html',  # Email HTML template (designed)
+            'email_template.html',  
             message=message,
             email=recipient
         )
