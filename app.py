@@ -543,7 +543,7 @@ def generate_email_token(user):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     return serializer.dumps(user.email, salt='email-verification')
 
-def verify_email_token(token, expiration=3600):
+def verify_email_token(token, expiration=300):
     serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
     try:
         email = serializer.loads(token, salt='email-verification', max_age=expiration)
@@ -581,8 +581,8 @@ def verify_registration(token):
     user.email_verified=True
     db.session.commit()
     login_user(user)
-    send_email("Welcome to Our App!", user.email, subject="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html') 
     flash('Email verified! Welcome to T-Give Nexus.', 'success')
+    send_email("Welcome to Our App!", user.email, subject="Registration Successful!", message_intro="Thank you for registering with us!", mobile=user.mobile, email=user.email, role=user.role, agreed=user.agreed, active=user.active, template='registration_email.html')
     return redirect(url_for('welcome'))
         
 #-------------‐-------------------------------------
