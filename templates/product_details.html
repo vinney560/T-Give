@@ -59,6 +59,13 @@
 
         /* Mobile Fixes */
         @media (max-width: 768px) {
+            html {
+                overflow-x: hidden;
+                position: fixed;
+                height: 100%;
+                width: 100%;
+            }
+            
             body {
                 overflow-y: auto;
                 height: auto;
@@ -74,18 +81,20 @@
             
             .md\:w-1\/2 {
                 width: 100% !important;
-            }
-            
-            input:focus {
                 position: relative;
-                z-index: 100;
-                transform: translateY(-50px);
+                transform: none !important;
             }
             
             .quantity-container {
                 width: 100%;
                 max-width: 150px;
                 margin-left: auto;
+            }
+
+            input:focus {
+                position: relative;
+                z-index: 100;
+                transform: none !important;
             }
         }
     </style>
@@ -212,7 +221,6 @@
     </main>
 
     <script>
-        // Existing JavaScript remains unchanged
         // Rating System
         let selectedRating = 0;
         document.querySelectorAll('.star-btn').forEach(btn => {
@@ -299,22 +307,24 @@
         }
 
         // Mobile Input Handling
-        window.addEventListener('resize', adjustLayout);
-        window.addEventListener('orientationchange', adjustLayout);
-
-        function adjustLayout() {
+        function handleMobileInputFocus() {
             if (window.innerWidth < 768) {
                 const activeElement = document.activeElement;
-                if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+                if (activeElement.id === 'quantity') {
                     setTimeout(() => {
-                        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 300);
+                        activeElement.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'nearest',
+                            inline: 'nearest'
+                        });
+                    }, 100);
                 }
             }
         }
 
-        document.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('focus', adjustLayout);
+        document.getElementById('quantity').addEventListener('focus', handleMobileInputFocus);
+        document.getElementById('quantity').addEventListener('blur', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
         // Handle Flask flash messages
