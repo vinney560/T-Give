@@ -48,7 +48,9 @@
       <div class="section"><div class="products-grid">
         {% for product in products %}
           <div class="product-card">
-            <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}" loading="lazy"></a>
+            <a href="{{ url_for('product_details', product_id=product.id) }}"><img src="{{ product.image_url }}"
+     onerror="this.onerror=null;this.src='{{ product.imgur_url }}';" 
+     alt="{{ product.name }}" loading="lazy"></a>
             <div class="product-name">{{ product.name }}</div>
             <div class="product-price">Ksh {{ product.price }}</div>
           </div>
