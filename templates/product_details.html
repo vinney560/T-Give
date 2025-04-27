@@ -57,7 +57,6 @@
             font-size: 1.2em;
         }
 
-        /* Mobile Fixes - Full Implementation */
         @media (max-width: 768px) {
             html {
                 height: 100% !important;
@@ -67,66 +66,50 @@
             }
             
             body {
-                overflow-y: auto;
-                height: auto;
-                min-height: 100vh;
                 position: fixed;
-                width: 100%;
+                overflow-y: auto;
                 -webkit-overflow-scrolling: touch;
+                width: 100%;
+                height: 100%;
             }
             
-            main {
-                flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-                padding-bottom: 100px;
+            .left-container {
+                padding-bottom: 55vh !important;
             }
             
-            .md\:w-1\/2 {
-                width: 100% !important;
-            }
-            
-            /* Fixed Right Container */
             .details-container {
                 position: fixed !important;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                top: auto !important;
-                transform: none !important;
+                height: 55vh;
                 z-index: 50;
-                background: linear-gradient(to bottom right, #1a1a1a, #2d2d2d);
-                border-top: 2px solid #0891b220;
+                background: linear-gradient(to bottom, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.9));
+                border-top: 2px solid rgba(8, 145, 178, 0.15);
                 box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.3);
-                max-height: 60vh;
-                overflow-y: auto;
                 transition: transform 0.3s ease;
             }
             
             .details-container > div {
                 border-radius: 1.5rem 1.5rem 0 0 !important;
                 padding: 1.5rem !important;
+                height: 100%;
+                overflow-y: auto;
             }
             
             .quantity-container {
-                position: relative;
                 z-index: 100;
-            }
-            
-            input:focus {
-                transform: none !important;
+                position: relative;
             }
         }
     </style>
 </head>
 <body class="h-full bg-gradient-to-br from-gray-900 to-gray-800">
-    <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
 
     <main class="h-full flex flex-col md:flex-row gap-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Left Container - Visual Section -->
-        <div class="md:w-1/2 h-full flex flex-col">
-            <!-- Back Button -->
+        <!-- Left Container -->
+        <div class="md:w-1/2 h-full flex flex-col left-container">
             <button onclick="history.back()" class="mb-8 self-start">
                 <svg class="w-8 h-8 text-cyan-400 hover:text-cyan-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -134,7 +117,6 @@
             </button>
 
             <div class="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl p-6 h-full flex flex-col">
-                <!-- Image Section -->
                 <div class="flex-1 relative group">
                     <div class="animate-pulse absolute top-0 left-0 right-0 text-center z-10">
                         <span class="text-cyan-400 font-semibold text-lg tracking-wider">T-GIVE NEXUS COLLECTION</span>
@@ -151,7 +133,6 @@
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
                 <div class="mt-8 space-y-4">
                     <div class="flex items-center justify-between">
                         <span class="text-2xl font-bold text-green-400">Ksh {{ product.price }}</span>
@@ -174,10 +155,9 @@
             </div>
         </div>
 
-        <!-- Right Container - Details Section -->
+        <!-- Right Container -->
         <div class="md:w-1/2 h-full flex flex-col details-container">
             <div class="bg-gray-800/50 backdrop-blur-lg rounded-3xl shadow-2xl p-6 sm:p-10 h-full flex flex-col">
-                <!-- Product Info -->
                 <div class="flex-1 space-y-8">
                     <h1 class="text-4xl font-bold text-cyan-300">{{ product.name }}</h1>
                     
@@ -192,7 +172,6 @@
                         </ul>
                     </div>
 
-                    <!-- Rating Section -->
                     <div class="space-y-8">
                         <div class="space-y-6">
                             <h2 class="text-2xl font-bold text-cyan-400">Rate This Product</h2>
@@ -231,7 +210,6 @@
             </div>
         </div>
 
-        <!-- Floating Cart Button -->
         <a href="{{ url_for('cart') }}" 
            class="fixed bottom-8 right-8 p-5 bg-cyan-600 hover:bg-cyan-700 rounded-full shadow-2xl transition-all hover:rotate-[30deg]">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +219,7 @@
     </main>
 
     <script>
-        // Original JavaScript with Mobile Fixes
+        // Rating System
         let selectedRating = 0;
         document.querySelectorAll('.star-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -257,6 +235,7 @@
             });
         });
 
+        // Toast System
         function showToast(message, success = true) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -277,6 +256,7 @@
             }, 3000);
         }
 
+        // Cart System
         async function addToCart(productId, button) {
             button.disabled = true;
             const quantity = parseInt(document.getElementById('quantity').value);
@@ -300,6 +280,7 @@
             }
         }
 
+        // Rating Submission
         async function submitRating(productId) {
             if (!selectedRating) return showToast("Please select a rating", false);
             
@@ -326,6 +307,7 @@
         // Mobile Keyboard Handling
         let lastHeight = window.innerHeight;
         const detailsContainer = document.querySelector('.details-container');
+        const leftContainer = document.querySelector('.left-container');
 
         function handleResize() {
             const newHeight = window.innerHeight;
@@ -333,19 +315,23 @@
 
             if (keyboardHeight > 100) {
                 detailsContainer.style.transform = `translateY(-${keyboardHeight}px)`;
+                leftContainer.style.paddingBottom = `${keyboardHeight + 55}vh`;
             } else {
                 detailsContainer.style.transform = 'none';
+                leftContainer.style.paddingBottom = '55vh';
             }
             lastHeight = newHeight;
         }
 
         window.addEventListener('resize', handleResize);
-        window.visualViewport?.addEventListener('resize', handleResize);
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', handleResize);
+        }
 
         document.getElementById('quantity').addEventListener('focus', () => {
             setTimeout(() => {
                 detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            }, 300);
+            }, 100);
         });
 
         // Flash Messages
