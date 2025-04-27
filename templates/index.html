@@ -1,27 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-gray-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('uploaded_file', filename='favicon.ico') }}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>T-Give | Modern Interface</title>
+    <title>T-Give Nexus | Welcome to T-Give</title>
     <style>
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100">
+<body class="h-full relative overflow-x-hidden">
+    <!-- Animated Background -->
+    <div class="absolute inset-0 opacity-5 z-0">
+        <svg viewBox="0 0 100 100" class="w-full h-full">
+            <pattern id="hex-pattern" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M5 0L10 2.5V7.5L5 10L0 7.5V2.5L5 0Z" fill="none" stroke="#00f7ff10" stroke-width="0.3"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hex-pattern)"/>
+        </svg>
+    </div>
+
     <!-- Flash Messages -->
-    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-slideIn">
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-2">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="p-4 mb-2 bg-emerald-500/10 backdrop-blur-lg rounded-lg border border-emerald-500/30 text-emerald-300">
-                        {{ message }}
-                    </div>
+                <div class="px-6 py-3 bg-gray-800/90 backdrop-blur-lg rounded-lg border border-cyan-500/30 text-cyan-300 flex items-center gap-2 animate-float">
+                    <svg class="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>{{ message }}</span>
+                </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
@@ -29,25 +42,36 @@
 
     <!-- Header -->
     <header class="fixed w-full top-0 z-40 bg-gray-900/80 backdrop-blur-md border-b border-gray-700">
-        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <!-- Menu Button -->
-            <button onclick="openMenu()" class="text-gray-300 hover:text-white">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onclick="openMenu()" class="p-2 hover:bg-gray-700/30 rounded-lg transition-colors">
+                <svg class="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
 
             <!-- Logo -->
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                T-Give
-            </h1>
+            <div class="flex items-center gap-2">
+                <svg class="w-8 h-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                    T-Give
+                </h1>
+            </div>
 
             <!-- Auth Buttons -->
-            <div class="flex gap-3">
-                <a href="/login" class="px-4 py-2 rounded-lg bg-cyan-600/20 border border-cyan-400/30 hover:bg-cyan-600/30 transition-colors">
+            <div class="flex gap-2">
+                <a href="/login" class="px-4 py-2 rounded-md bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-400/30 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M13.8 12H3"/>
+                    </svg>
                     Login
                 </a>
-                <a href="/register" class="px-4 py-2 rounded-lg bg-emerald-600/20 border border-emerald-400/30 hover:bg-emerald-600/30 transition-colors">
+                <a href="/register" class="px-4 py-2 rounded-md bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-400/30 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
                     Register
                 </a>
             </div>
@@ -57,44 +81,74 @@
     <!-- Sidebar -->
     <nav id="sidebar" class="fixed left-[-300px] top-0 h-full w-[300px] bg-gray-900/95 backdrop-blur-xl border-r border-gray-700 transition-all duration-300 z-50">
         <div class="p-6">
-            <button onclick="closeMenu()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onclick="closeMenu()" class="absolute top-4 right-4 p-2 hover:bg-gray-700/30 rounded-lg">
+                <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
-            <div class="mt-12 space-y-2">
+            
+            <nav class="mt-16 space-y-2">
                 <a href="/home" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
                     Home
                 </a>
-                <!-- Add other menu items with similar structure -->
-            </div>
+                <a href="/about" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    About
+                </a>
+                <a href="/user_messages" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    </svg>
+                    Messages
+                </a>
+                <a href="/services" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Services
+                </a>
+                <a href="/HELP" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors">
+                    <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Help
+                </a>
+            </nav>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="pt-24 pb-12 min-h-screen">
+    <main class="pt-24 pb-12 min-h-screen relative z-10">
         <div class="container mx-auto px-4">
             <!-- Products Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {% for product in products %}
-                <div class="group relative bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-cyan-400 transition-all">
-                    <div class="aspect-square mb-4 overflow-hidden rounded-lg">
+                <div class="group relative bg-gray-800 rounded-xl p-4 border border-gray-700 hover:border-cyan-400 transition-all hover:shadow-2xl hover:shadow-cyan-500/10">
+                    <div class="aspect-square mb-4 overflow-hidden rounded-lg relative">
                         <img src="{{ product.display_image }}" alt="{{ product.name }}" 
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                             loading="lazy">
+                        <div class="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 bg-gray-900/80 rounded-full text-sm">
+                            <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <span class="text-cyan-300">{{ product.rating | default(4.5) }}</span>
+                        </div>
                     </div>
-                    <h3 class="font-semibold text-gray-200">{{ product.name }}</h3>
-                    <p class="text-cyan-400 font-mono">Ksh {{ product.price }}</p>
                     
-                    <!-- Rating Stars -->
-                    <div class="flex items-center mt-2 text-amber-400">
-                        {% for _ in range(5) %}
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                        {% endfor %}
+                    <h3 class="font-semibold text-gray-200 truncate">{{ product.name }}</h3>
+                    <div class="flex items-center justify-between mt-2">
+                        <p class="text-cyan-400 font-mono">Ksh {{ product.price }}</p>
+                        <button class="p-2 hover:bg-cyan-500/10 rounded-full transition-colors">
+                            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -112,13 +166,13 @@
             document.getElementById("sidebar").style.left = "-300px";
         }
 
-        // Flash message handling
+        // Auto-remove flash messages
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
-                document.querySelectorAll('[class*="animate-slideIn"]').forEach(el => {
+                document.querySelectorAll('[class*="animate-float"]').forEach(el => {
                     el.remove();
                 });
-            }, 3000);
+            }, 4000);
         });
     </script>
 </body>
