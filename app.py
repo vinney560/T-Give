@@ -863,7 +863,7 @@ def upload_product3d():
 
         if model_file and model_file.filename.endswith('.fbx'):
             filename = secure_filename(model_file.filename)
-            model_path = os.path.join('static/models', filename)
+            model_path = os.path.join('uploads', filename)
             model_file.save(model_path)
 
             new_product = Product3D(

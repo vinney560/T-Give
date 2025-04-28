@@ -16,7 +16,7 @@
     <div class="bg-gray-800 rounded-xl p-6 shadow-xl hover:scale-105 transform transition-all duration-300">
       
       <model-viewer 
-        src="{{ url_for('static', filename='models/' + product.model_filename) }}" 
+        src="{{ url_for('uploads', filename=product.model_filename) }}" 
         alt="{{ product.name }}" 
         camera-controls 
         auto-rotate 
