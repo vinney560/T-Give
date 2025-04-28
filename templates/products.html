@@ -128,10 +128,9 @@
     .view-cart:hover { 
       background: #00cccc; 
     }
-    .settings-btn {  position: fixed; top: 20px; left: 20px; background: transparent;  border: none; cursor: pointer; padding: 15px; z-index: 1551; transition: background 0.3s ease; }
-    .settings-btn:hover { background: #00cccc; border-radius: 50%; transform: rotate (90deg); }
-    .settings-btn:hover svg { transform: scale(1.1); }
-    .settings-btn svg { display: block; transition: transform 0.3s ease; }
+    .settings-btn { position: fixed; top: 20px;  left: 20px; background: transparent;  border: none; cursor: pointer;  padding: 5px; z-index: 1551; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+    .settings-btn:hover { background: rgba(0, 204, 204, 0.2); border-radius: 50%; transform: rotate(90deg) scale(1.1); }
+    .settings-btn:hover svg path { stroke-width: 2.5; filter: drop-shadow(0 0 4px rgba(0, 204, 204, 0.7)); }
 
   </style>  
 </head>  
@@ -225,12 +224,26 @@
   <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
   <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'">
     <svg viewBox="0 0 24 24" width="70" height="70">
-    <!-- Short line -->
-      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6h10"/>
-    <!-- Medium line -->
-      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 12h16"/>
-    <!-- Long line -->
-      <path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M2 18h20"/>
+    <!-- Gradient-colored strokes -->
+      <path stroke="url(#gradient1)" stroke-width="2" stroke-linecap="round" d="M6 6h10"/>
+      <path stroke="url(#gradient2)" stroke-width="2" stroke-linecap="round" d="M4 12h16"/>
+      <path stroke="url(#gradient3)" stroke-width="2" stroke-linecap="round" d="M2 18h20"/>
+    
+    <!-- Gradient definitions -->
+      <defs>
+        <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00FF87" />
+          <stop offset="100%" stop-color="#00CCCC" />
+        </linearGradient>
+        <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#FF00FF" />
+          <stop offset="100%" stop-color="#00CCCC" />
+        </linearGradient>
+        <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0066FF" />
+          <stop offset="100%" stop-color="#00CCCC" />
+        </linearGradient>
+      </defs>
     </svg>
   </button>
 
