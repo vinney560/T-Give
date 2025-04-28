@@ -206,40 +206,34 @@
   <!-- Full Updated Script -->
   <script>
   window.onload = function() {
-    // 3D Hover + Scroll Tilt
-    const imageContainer = document.querySelector('.product-image-container');
-    const imageWrapper = document.querySelector('.product-image-wrapper');
+        const imageContainer = document.querySelector('.product-image-container');
+        const imageWrapper = document.querySelector('.product-image-wrapper');
 
-    if (imageContainer && imageWrapper) {
-      imageContainer.addEventListener('mousemove', (e) => {
-        const { left, top, width, height } = imageContainer.getBoundingClientRect();
-        const x = (e.clientX - left) / width - 0.5;
-        const y = (e.clientY - top) / height - 0.5;
+        if (imageContainer && imageWrapper) {
+            imageContainer.addEventListener('mousemove', (e) => {
+                const { left, top, width, height } = imageContainer.getBoundingClientRect();
+                const x = (e.clientX - left) / width - 0.5;  // left/right
+                const y = (e.clientY - top) / height - 0.5;  // up/down
 
-        const rotateX = (-y * 30).toFixed(2);
-        const rotateY = (x * 30).toFixed(2);
+                const rotateX = (-y * 20).toFixed(2);  // Up/Down tilt
+                const rotateY = (x * 20).toFixed(2);   // Left/Right tilt
 
-        imageWrapper.style.transform = `
-          rotateX(${rotateX}deg)
-          rotateY(${rotateY}deg)
-          scale(1.07)
-        `;
-        imageWrapper.style.boxShadow = `
-          ${-x * 50}px ${-y * 50}px 100px rgba(0, 255, 255, 0.4)
-        `;
-      });
+                imageWrapper.style.transform = `
+                    rotateX(${rotateX}deg)
+                    rotateY(${rotateY}deg)
+                    scale(1.07)
+                `;
+                imageWrapper.style.boxShadow = `
+                    ${-x * 40}px ${-y * 40}px 80px rgba(0, 255, 255, 0.3)
+                `;
+            });
 
-      imageContainer.addEventListener('mouseleave', () => {
-        imageWrapper.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
-        imageWrapper.style.boxShadow = '0 0 30px rgba(0,0,0,0.3)';
-      });
-
-      window.addEventListener('scroll', () => {
-        const scrollY = window.scrollY || window.pageYOffset;
-        const tilt = Math.min(scrollY / 100, 5);
-        imageWrapper.style.transform += ` rotateZ(${tilt}deg)`;
-      });
-    }
+            imageContainer.addEventListener('mouseleave', () => {
+                imageWrapper.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+                imageWrapper.style.boxShadow = '0 0 30px rgba(0,0,0,0.3)';
+            });
+        }
+    };
 
     // Rating System
     let selectedRating = 0;
