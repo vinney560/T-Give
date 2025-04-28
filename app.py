@@ -848,41 +848,60 @@ def complete_checkout3d():
     flash("✅ 3D Order Successful! Thank you.", "success")
     return redirect(url_for('products3d'))
 
+import uuid
 @app.route('/upload_product3d', methods=['GET', 'POST'])
 @login_required
 def upload_product3d():
     if current_user.role not in ['admin', 'superadmin']:
-        abort(403)  # Only admin/superadmin can upload 3D products
+        abort(403)
 
     if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        price = float(request.form['price'])
-        stock = int(request.form['stock'])
-        model_file = request.files['model_file']
+        try:
+            # Ensure 'uploads' directory exists
+            os.makedirs('uploads', exist_ok=True)
+            
+            # Get form data
+            name = request.form['name']
+            description = request.form['description']
+            price = float(request.form['price'])
+            stock = int(request.form['stock'])
+            model_file = request.files['model_file']
 
-        if model_file and model_file.filename.endswith('.fbx'):
-            filename = secure_filename(model_file.filename)
-            model_path = os.path.join('uploads', filename)
-            model_file.save(model_path)
+            if model_file:
+                filename = secure_filename(model_file.filename)
+                file_ext = os.path.splitext(filename)[1].lower()
+                
+                if file_ext == '.fbx':  # Changed from .glb to .fbx
+                    # Generate unique filename to prevent collisions
+                    unique_filename = f"{uuid.uuid4().hex}{file_ext}"
+                    save_path = os.path.join('uploads', unique_filename)
+                    
+                    # Save file
+                    model_file.save(save_path)
 
-            new_product = Product3D(
-                name=name,
-                description=description,
-                price=price,
-                stock=stock,
-                model_filename=filename
-            )
-            db.session.add(new_product)
-            db.session.commit()
+                    # Create database record
+                    new_product = Product3D(
+                        name=name,
+                        description=description,
+                        price=price,
+                        stock=stock,
+                        model_filename=unique_filename  # Store unique filename
+                    )
+                    db.session.add(new_product)
+                    db.session.commit()
 
-            flash('3D Product Uploaded Successfully!', 'success')
-            return redirect(url_for('products3d'))
-        else:
-            flash('Invalid file format. Only .glb allowed.', 'error')
+                    flash('FBX model uploaded successfully!', 'success')
+                    return redirect(url_for('products3d'))
+                else:
+                    flash('Only .fbx files are accepted', 'error')
+            else:
+                flash('No file selected', 'error')
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Upload failed: {str(e)}', 'error')
 
     return render_template('upload_product3d.html')
-
 #---------------------------------------------------
 def get_cart():
     if 'cart' not in session:
