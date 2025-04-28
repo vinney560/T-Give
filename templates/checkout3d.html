@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout 3D | T-Give Nexus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-gray-100 p-8 min-h-screen flex flex-col items-center">
+
+  <h1 class="text-4xl font-bold mb-8 text-cyan-400">Checkout 3D Products</h1>
+
+  <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-2xl text-center">
+    <p class="text-xl mb-6">Confirm your 3D purchase:</p>
+    <p class="text-2xl text-green-400 font-bold mb-8">Total: Ksh {{ total }}</p>
+
+    <form action="{{ url_for('complete_checkout3d') }}" method="POST">
+      <button type="submit" class="w-full bg-gradient-to-r from-green-400 to-blue-500 hover:from-blue-500 hover:to-green-400 text-white font-bold py-4 rounded-lg transition">
+        Complete Purchase
+      </button>
+    </form>
+
+    <a href="{{ url_for('cart3d') }}" class="block text-blue-400 hover:underline mt-6">
+      Return to Cart
+    </a>
+  </div>
+
+</body>
+</html>

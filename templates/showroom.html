@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ product.name }} | T-Give Nexus 3D</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col items-center p-8">
+
+  <h1 class="text-3xl font-bold mb-6 text-cyan-400">{{ product.name }}</h1>
+
+  <div class="bg-gray-800 rounded-xl p-6 shadow-2xl max-w-3xl w-full">
+    <model-viewer 
+      src="{{ url_for('static', filename='models/' + product.model_filename) }}"
+      alt="{{ product.name }}"
+      camera-controls 
+      auto-rotate 
+      shadow-intensity="1"
+      exposure="1.2"
+      class="w-full h-[500px] rounded-lg bg-gray-700">
+    </model-viewer>
+
+    <div class="mt-6">
+      <p class="text-lg text-gray-300 mb-4">{{ product.description }}</p>
+      <h2 class="text-2xl text-cyan-400 mb-6">Ksh {{ product.price }}</h2>
+
+      <form action="{{ url_for('add_to_cart_3d', product3d_id=product.id) }}" method="POST">
+        <button type="submit" class="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-blue-500 hover:to-cyan-400 text-white py-3 px-6 rounded-lg font-bold transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3z"/>
+          </svg>
+          Add to Cart
+        </button>
+      </form>
+
+      <div class="mt-6">
+        <a href="{{ url_for('products3d') }}" class="text-blue-400 hover:underline text-sm flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to 3D Products
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

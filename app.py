@@ -125,6 +125,15 @@ class Product(db.Model):
             total = sum(r.rating for r in self.ratings)
             return total // len(self.ratings)
         return 0
+
+class Product3D(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    model_filename = db.Column(db.String(200), nullable=False)  # GLB file
+    stock = db.Column(db.Integer, default=1)
+
 #---------------------------------------------------
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -778,6 +787,102 @@ def product_details(product_id):
     average_rating = product.get_average_rating()
 
     return render_template('product_details.html', product=product, user_rating=user_rating, average_rating=average_rating)
+
+#---------------------------------------------------
+
+@app.route('/showroom/<int:product3d_id>')
+def showroom(product3d_id):
+    product = Product3D.query.get_or_404(product3d_id)
+    return render_template('showroom.html', product=product)
+
+@app.route('/products3d')
+def products3d():
+    products = Product3D.query.all()
+    return render_template('products3d.html', products=products)
+
+@app.route('/add_to_cart_3d/<int:product3d_id>', methods=['POST'])
+@login_required
+def add_to_cart_3d(product3d_id):
+    product = Product3D.query.get_or_404(product3d_id)
+
+    cart = session.get('cart3d', {})
+    cart[str(product3d_id)] = cart.get(str(product3d_id), 0) + 1
+    session['cart3d'] = cart
+
+    flash(f"{product.name} added to your 3D cart!", "success")
+    return redirect(url_for('showroom', product3d_id=product3d_id))
+
+@app.route('/cart3d')
+@login_required
+def cart3d():
+    cart = session.get('cart3d', {})
+    items = []
+    total = 0
+    for product_id, quantity in cart.items():
+        product = Product3D.query.get(int(product_id))
+        if product:
+            items.append({
+                'id': product.id,
+                'name': product.name,
+                'price': product.price,
+                'quantity': quantity
+            })
+            total += product.price * quantity
+    return render_template('cart3d.html', cart_items=items, total=total)
+
+@app.route('/checkout3d')
+@login_required
+def checkout3d():
+    cart = session.get('cart3d', {})
+    total = 0
+    for product_id, quantity in cart.items():
+        product = Product3D.query.get(int(product_id))
+        if product:
+            total += product.price * quantity
+    return render_template('checkout3d.html', total=total)
+
+@app.route('/complete_checkout3d', methods=['POST'])
+@login_required
+def complete_checkout3d():
+    session.pop('cart3d', None)
+    flash("✅ 3D Order Successful! Thank you.", "success")
+    return redirect(url_for('products3d'))
+
+@app.route('/upload_product3d', methods=['GET', 'POST'])
+@login_required
+def upload_product3d():
+    if current_user.role not in ['admin', 'superadmin']:
+        abort(403)  # Only admin/superadmin can upload 3D products
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        stock = int(request.form['stock'])
+        model_file = request.files['model_file']
+
+        if model_file and model_file.filename.endswith('.fbx'):
+            filename = secure_filename(model_file.filename)
+            model_path = os.path.join('static/models', filename)
+            model_file.save(model_path)
+
+            new_product = Product3D(
+                name=name,
+                description=description,
+                price=price,
+                stock=stock,
+                model_filename=filename
+            )
+            db.session.add(new_product)
+            db.session.commit()
+
+            flash('3D Product Uploaded Successfully!', 'success')
+            return redirect(url_for('products3d'))
+        else:
+            flash('Invalid file format. Only .glb allowed.', 'error')
+
+    return render_template('upload_product3d.html')
+
 #---------------------------------------------------
 def get_cart():
     if 'cart' not in session:
