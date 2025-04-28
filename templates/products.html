@@ -143,6 +143,8 @@
     .settings-btn:hover { 
       background: #00cccc;
     }
+    .settings-btn:hover svg { transform: scale(1.1); }
+    .settings-btn svg { display: block; transition: transform 0.3s ease; }
 
   </style>  
 </head>  
@@ -234,7 +236,13 @@
     </div>
   {% endfor %}
   <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
-  <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'"><b>≡</b></button>
+  <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'">
+    <svg viewBox="0 0 100 100" width="40" height="40">
+      <rect x="20" y="30" width="60" height="10" rx="5" fill="black"/>
+      <rect x="20" y="45" width="60" height="10" rx="5" fill="black"/>
+      <rect x="20" y="60" width="60" height="10" rx="5" fill="black"/>
+    </svg>
+  </button>
   <div id="toast" class="toast"></div>
   <script>  
       // Show toast notifications  
