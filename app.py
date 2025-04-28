@@ -471,7 +471,7 @@ def login():
             else:
                 return redirect(url_for('products'))
 
-        flash(" nvalid mobile or password", "error")
+        flash(" Invalid credentials", "error")
         return render_template("login.html", mobile=raw_mobile, password=password)
 
     return render_template('login.html', mobile=mobile)
@@ -542,7 +542,7 @@ def register():
         send_verification_email(new_user)
 
         flash("Check your email to finish Registration", "success")
-        return redirect(url_for('login'))
+        return redirect(url_for('home'))
 
     return render_template('register.html')
 
