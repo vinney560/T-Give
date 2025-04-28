@@ -797,8 +797,8 @@ def showroom(product3d_id):
 
 @app.route('/products3d')
 def products3d():
-    products = Product3D.query.all()
-    return render_template('products3d.html', products=products)
+    products = Product.query.all()
+    return render_template('products3D.html', products=products)
 
 @app.route('/add_to_cart_3d/<int:product3d_id>', methods=['POST'])
 @login_required

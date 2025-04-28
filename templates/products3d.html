@@ -4,7 +4,23 @@
   <meta charset="UTF-8">
   <title>3D Products - T-Give Nexus</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    .card-3d {
+      transform-style: preserve-3d;
+      transition: all 0.5s ease;
+    }
+    .card-3d:hover {
+      transform: perspective(1000px) rotateY(15deg) rotateX(10deg);
+    }
+    .product-image {
+      transform: translateZ(20px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      transition: all 0.5s ease;
+    }
+    .card-3d:hover .product-image {
+      transform: translateZ(40px);
+    }
+  </style>
 </head>
 
 <body class="bg-gray-900 text-gray-100 min-h-screen p-8">
@@ -13,32 +29,36 @@
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     {% for product in products %}
-    <div class="bg-gray-800 rounded-xl p-6 shadow-xl hover:scale-105 transform transition-all duration-300">
+    <div class="card-3d bg-gray-800 rounded-xl p-6 shadow-xl hover:shadow-2xl">
+      <!-- Replace model-viewer with image -->
+      <img src="{{ product.image_url }}" 
+            onerror="this.onerror=null;this.src='{{ product.imgur_url }}'"
+            alt="{{ product.name}}" 
+           class="product-image w-full h-64 object-cover rounded-lg mb-4">
       
-      <model-viewer 
-        src="{{ url_for('uploads', filename=product.model_filename) }}" 
-        alt="{{ product.name }}" 
-        camera-controls 
-        auto-rotate 
-        shadow-intensity="1"
-        class="w-full h-64 rounded-lg mb-4 bg-gray-700">
-      </model-viewer>
-
       <h2 class="text-2xl font-semibold text-white mb-2">{{ product.name }}</h2>
       <p class="text-cyan-300 text-lg mb-4">Ksh {{ product.price }}</p>
 
-      <a href="{{ url_for('showroom', product3d_id=product.id) }}"
-         class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-2 px-4 rounded-lg transition">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        View in 3D
-      </a>
-
+      <button class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-2 px-4 rounded-lg transition">
+        View Details
+      </button>
     </div>
     {% endfor %}
   </div>
 
+  <script>
+    // Add simple parallax effect
+    document.querySelectorAll('.card-3d').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+        card.style.transform = `perspective(1000px) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateY(0) rotateX(0)';
+      });
+    });
+  </script>
 </body>
 </html>
