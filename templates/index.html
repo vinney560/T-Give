@@ -177,7 +177,7 @@
         // Replace your existing addToCart function with this:
         async function addToCart(productId, button) {
         // Check if user is logged in (via cookie/token)
-        const isLoggedIn = document.cookie.includes('session'); // Or check localStorage
+        const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
   
         if (!isLoggedIn) {
         // Show login modal instead of adding to cart
