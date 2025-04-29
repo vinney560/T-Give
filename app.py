@@ -1534,6 +1534,8 @@ def db_storage_xata():
 @admin_required
 @csrf.exempt
 def admin_dashboard():
+    if current_user.role=='superadmin':
+        return redirect(url_for('super_admin_dashboard'))
     return render_template('admin_dashboard.html')
 
 @app.route('/super_admin/dashboard')
