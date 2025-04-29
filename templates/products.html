@@ -224,12 +224,7 @@
   <button class="view-cart" onclick="window.location.href='{{ url_for('cart') }}'">View Cart</button>
   <button class="settings-btn" onclick="window.location.href='{{ url_for('user_dashboard') }}'">
     <svg viewBox="0 0 24 24" width="70" height="70">
-    <!-- Gradient-colored strokes -->
-      <path stroke="url(#gradient1)" stroke-width="2" stroke-linecap="round" d="M6 6h10"/>
-      <path stroke="url(#gradient2)" stroke-width="2" stroke-linecap="round" d="M4 12h16"/>
-      <path stroke="url(#gradient3)" stroke-width="2" stroke-linecap="round" d="M2 18h20"/>
-    
-    <!-- Gradient definitions -->
+    <!-- Gradient definitions MUST come first in SVG -->
       <defs>
         <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stop-color="#00FF87" />
@@ -244,8 +239,14 @@
           <stop offset="100%" stop-color="#00CCCC" />
         </linearGradient>
       </defs>
+    
+    <!-- Paths using the gradients -->
+      <path stroke="url(#gradient1)" stroke-width="2" stroke-linecap="round" d="M6 6h10"/>
+      <path stroke="url(#gradient2)" stroke-width="2" stroke-linecap="round" d="M4 12h16"/>
+      <path stroke="url(#gradient3)" stroke-width="2" stroke-linecap="round" d="M2 18h20"/>
     </svg>
   </button>
+
 
   <div id="toast" class="toast"></div>
   <script>  
