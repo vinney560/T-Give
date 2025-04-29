@@ -144,7 +144,7 @@
                     <h3 class="font-semibold text-gray-200 truncate">{{ product.name }}</h3>
                     <div class="flex items-center justify-between mt-2">
                         <p class="text-cyan-400 font-mono">Ksh {{ product.price }}</p>
-                        <button class="p-2 hover:bg-cyan-500/10 rounded-full transition-colors" onclick="window.location.href='/login'">
+                        <button class="p-2 hover:bg-cyan-500/10 rounded-full transition-colors" onclick="addToCart()">
                             <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
@@ -174,6 +174,62 @@
                 });
             }, 3000);
         });
+        // Replace your existing addToCart function with this:
+        async function addToCart(productId, button) {
+        // Check if user is logged in (via cookie/token)
+        const isLoggedIn = document.cookie.includes('session'); // Or check localStorage
+  
+        if (!isLoggedIn) {
+        // Show login modal instead of adding to cart
+           showLoginModal();
+           return;
+       }
+
+       button.disabled = true;
+       try {
+          const response = await fetch('/add_to_cart', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': document.getElementById('csrf-token').value
+              },
+              body: JSON.stringify({ 
+              product_id: productId, 
+              quantity: document.getElementById('quantity').value 
+              })
+        });
+    
+        const data = await response.json();
+        showToast(data.message, data.success);
+      } catch (error) {
+            showToast("Failed to add to cart", false);
+      } finally {
+           button.disabled = false;
+         }
+     }
+
+    // Login Modal (add to your HTML)
+    function showLoginModal() {
+        const modal = `
+        <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-xl text-cyan-300 mb-4">Please Login</h3>
+            <p class="text-gray-300 mb-6">You need to login to add items to your cart.</p>
+            <div class="flex gap-4">
+              <button onclick="window.location.href='/login'" 
+                     class="flex-1 py-2 bg-cyan-600 hover:bg-cyan-700 rounded-lg">
+                Login
+              </button>
+              <button onclick="document.getElementById('login-modal').remove()" 
+                      class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modal);
+    }
     </script>
 </body>
 </html>
