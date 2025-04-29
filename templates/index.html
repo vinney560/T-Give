@@ -23,6 +23,7 @@
     </style>
 </head>
 <body class="h-full relative overflow-x-hidden">
+<input type="hidden" id="csrf-token" value="{{ csrf_token() }}">
     <!-- Animated Background -->
     <div class="absolute inset-0 opacity-5 z-0">
         <svg viewBox="0 0 100 100" class="w-full h-full">
@@ -187,8 +188,7 @@
 
         // Add to Cart with Login Check
         async function handleAddToCart(productId, button) {
-            // Check if user is logged in (you may need to adjust this based on your auth system)
-            const isLoggedIn = document.cookie.includes('session_token') || localStorage.getItem('authToken');
+            const isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
             
             if (!isLoggedIn) {
                 showLoginModal(productId);
