@@ -11,8 +11,11 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
         }
+        #login-modal { animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
+<input type="hidden" id="csrf-token" value="{{ csrf_token() }}">
 <body class="h-full relative overflow-x-hidden">
     <!-- Animated Background -->
     <div class="absolute inset-0 opacity-5 z-0">
