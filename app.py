@@ -1528,6 +1528,9 @@ def db_storage_xata():
 
     log_admin_activity("[ADMIN VIEW DB] Viewed database storage")
 #===================================================
+@app.route('/ha')
+def ha():
+    return render_template("Ha.html")
 #===================================================
 
 @app.route('/admin/dashboard')
