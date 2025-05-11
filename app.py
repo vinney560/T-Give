@@ -39,7 +39,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "3ab7b7e619e24a3ae40a46c79b9b80439251aa976d03eb909dfe37d4a4a927dd")
 app.config['SESSION_PERMANENT'] = True 
-db_url = os.getenv("DATABASE_URL1")
+db_url = os.getenv("DATABASE_URL")
 if not db_url:
     raise RuntimeError("❌ DATABASE_URL is missing. Make sure it's set in Render env settings.")
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
