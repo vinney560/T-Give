@@ -38,13 +38,12 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "3ab7b7e619e24a3ae40a46c79b9b80439251aa976d03eb909dfe37d4a4a927dd")
-app.config['SESSION_PERMANENT'] = True 
-<<<<<<< HEAD
+app.config['SESSION_PERMANENT'] = True
 db_url = os.getenv("DATABASE_URL")
 if not db_url:
     raise RuntimeError("❌ DATABASE_URL is missing. Make sure it's set in Render env settings.")
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-=======
+
 def choose_db_uri():
     neon_uri = os.getenv('DATABASE_URL1')  # Neon
     render_uri = os.getenv('DATABASE_URL')  # Render
@@ -71,7 +70,6 @@ def choose_db_uri():
         raise RuntimeError("⚠DATABASE_URL and DATABASE_URL1 are missing in env file.")
         
 app.config['SQLALCHEMY_DATABASE_URI'] = choose_db_uri()
->>>>>>> a167a94 (Update product details)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '1b2bd05468432c4f8a4a2b3f23aef5afebd1995ac49af3536ce147b5d48c781d'
 app.config['ACTIVITY_RETENTION_DAYS'] = 30
